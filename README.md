@@ -100,16 +100,55 @@ pip install -r requirements.txt
 ```
 
 ### 3. Configuration des Clés API
-```bash
-# Définir la clé Groq dans les variables d'environnement
-export GROQ_API_KEY="votre_clé_api_groq"
-# Ou modifier directement dans backend/main.py pour les tests
+Crée un fichier `backend/.env` et ajoute-y ta clé Groq/OpenAI.
+
+```env
+# backend/.env
+GROQ_API_KEY=votre_clé_api_groq
 ```
+
+Le fichier `backend/.env` est déjà ignoré par `.gitignore`, donc il ne sera pas poussé sur GitHub.
 
 ### 4. Lancement du Backend
 ```bash
-# Lancer le serveur FastAPI
-uvicorn main:app --reload --host 0.0.0.0 --port 8001
+# Depuis le dossier backend
+uvicorn main:app --reload --host 0.0.0.0 --port 8081
+```
+
+### 5. Publication sur GitHub
+Si tu veux pousser ce projet vers `https://github.com/Hassan-ibbakh/smart-campus`, exécute depuis la racine du projet :
+
+```powershell
+cd "c:\Users\ATLAS PRO ELECTRO\Downloads\projet X\zip version\zip version"
+
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/Hassan-ibbakh/smart-campus.git
+git push -u origin main
+```
+
+Si tu as déjà un dépôt Git local, vérifie que `backend/venv/` et `backend/.env` ne sont pas ajoutés :
+
+```powershell
+git status --short
+```
+
+Si ces éléments apparaissent, retire-les avec :
+
+```powershell
+git rm --cached -r backend/venv
+git rm --cached backend/.env
+```
+
+### 6. Lancement du Frontend
+```bash
+# Retourner à la racine du projet
+cd ..
+
+# Lancer Expo
+npx expo start -c
 ```
 
 ### 5. Lancement du Frontend
