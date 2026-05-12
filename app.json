@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Smart Campus",
+    "slug": "smart-campus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "L'application a besoin du microphone pour enregistrer vos commandes vocales."
+      }
+    },
+    "android": {
+      "package": "com.hackmia.smartcampus",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "L'application a besoin du microphone pour enregistrer vos commandes vocales."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

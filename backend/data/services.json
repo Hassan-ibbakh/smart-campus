@@ -1,0 +1,42 @@
+[
+  {
+    "id": "scolarite",
+    "node_id": "scolarite",
+    "name": "Scolarité centrale",
+    "description": "Délivrance des certificats de scolarité, relevés de notes, attestations de réussite, inscriptions administratives.",
+    "keywords": ["certificat", "attestation", "notes", "inscription", "réinscription"],
+    "horaires": "Lun-Ven 9h-12h, 14h-16h"
+  },
+  {
+    "id": "bibliotheque",
+    "node_id": "hall",
+    "name": "Bibliothèque universitaire",
+    "description": "Prêt de livres, accès aux ressources numériques, salles de travail, reprographie.",
+    "keywords": ["livre", "emprunt", "étudier", "photocopie"],
+    "horaires": "Lun-Sam 8h-20h"
+  },
+  {
+    "id": "resto_u",
+    "node_id": "cafeteria",
+    "name": "Restaurant universitaire",
+    "description": "Repas abordables, tickets restaurant, menu végétarien.",
+    "keywords": ["manger", "déjeuner", "cafétéria", "repas"],
+    "horaires": "11h30-14h"
+  },
+  {
+    "id": "carte_etudiant",
+    "node_id": "scolarite",
+    "name": "Carte d'étudiant",
+    "description": "Fabrication et renouvellement de la carte d'étudiant (photo, identité).",
+    "keywords": ["carte étudiant", "carte d'identité étudiante", "photo", "badge"],
+    "horaires": "Lun-Jeu 9h-17h"
+  },
+  {
+    "id": "orientation",
+    "node_id": "direction",
+    "name": "Cellule d'orientation",
+    "description": "Conseils en parcours, aides à l'insertion professionnelle, choix de filière.",
+    "keywords": ["orientation", "conseil", "filière", "métier", "stage"],
+    "horaires": "Mercredi 9h-12h"
+  }
+]

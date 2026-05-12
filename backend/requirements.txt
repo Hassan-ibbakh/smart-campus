@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+groq
+python-multipart
+numpy
+chromadb
+sentence-transformers
+torch
+requests
+python-dotenv
