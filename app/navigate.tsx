@@ -98,7 +98,7 @@ export default function NavigateScreen() {
     }
   }, [isArrived]);
 
-  const handleSpeechEnd = async (audioUri: string) => {
+  const handleSpeechEnd = async (audioUri: string | File) => {
     speak("Analyse vocale en cours...", "normal");
     try {
       const { processVoiceCommand } = require('../services/api');

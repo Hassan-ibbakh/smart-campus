@@ -6,9 +6,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Audio } from 'expo-av';
 
-export default function VoiceButton({ onSpeechEnd }: { onSpeechEnd: (audioUri: string) => void }) {
+export default function VoiceButton({ onSpeechEnd }: { onSpeechEnd: (audioUri: string | File) => void }) {
   const [state, setState]       = useState<'idle' | 'listening' | 'processing'>('idle');
   const recordingRef            = useRef<Audio.Recording | null>(null);
+  const mediaRecorderRef        = useRef<MediaRecorder | null>(null);
+  const chunksRef               = useRef<BlobPart[]>([]);
   const pulse                   = useSharedValue(0);
 
   // ─── Animation pulse ──────────────────────────────────────────────────────
@@ -26,7 +28,44 @@ export default function VoiceButton({ onSpeechEnd }: { onSpeechEnd: (audioUri: s
 
   // ─── Démarrer l'enregistrement ────────────────────────────────────────────
   const startRecording = async () => {
-    if (Platform.OS === 'web' || state !== 'idle') return;
+    if (state !== 'idle') return;
+
+    if (Platform.OS === 'web') {
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+        Alert.alert(
+          'Microphone non supporté',
+          'Ce navigateur ne prend pas en charge l\'enregistrement audio.',
+        );
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+
+        chunksRef.current = [];
+        recorder.ondataavailable = event => {
+          if (event.data.size > 0) chunksRef.current.push(event.data);
+        };
+
+        recorder.onstop = () => {
+          const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+          const file = new File([blob], 'query.webm', { type: 'audio/webm' });
+          onSpeechEnd(file);
+          stream.getTracks().forEach(track => track.stop());
+          setTimeout(() => setState('idle'), 800);
+        };
+
+        recorder.start();
+        mediaRecorderRef.current = recorder;
+        setState('listening');
+      } catch (err) {
+        console.error('[VoiceButton] startRecording web error:', err);
+        setState('idle');
+      }
+
+      return;
+    }
 
     // 1. Demander la permission micro
     const { status } = await Audio.requestPermissionsAsync();
@@ -67,6 +106,22 @@ export default function VoiceButton({ onSpeechEnd }: { onSpeechEnd: (audioUri: s
 
   // ─── Arrêter l'enregistrement ─────────────────────────────────────────────
   const stopRecording = async () => {
+    if (Platform.OS === 'web') {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder || state !== 'listening') return;
+
+      mediaRecorderRef.current = null;
+      setState('processing');
+
+      try {
+        recorder.stop();
+      } catch (err) {
+        console.error('[VoiceButton] stopRecording web error:', err);
+        setState('idle');
+      }
+      return;
+    }
+
     if (!recordingRef.current || state !== 'listening') return;
 
     const rec = recordingRef.current;

@@ -105,14 +105,29 @@ export const locateSemantically = async (description: string) => {
 
 import * as FileSystem from 'expo-file-system/legacy';
 
-export const processVoiceCommand = async (audioUri: string) => {
+export const processVoiceCommand = async (audioUri: string | File) => {
   try {
-    const uploadResult = await FileSystem.uploadAsync(`${API_URL}/voice_command`, audioUri, {
-      httpMethod: 'POST',
-      uploadType: 1, // FileSystemUploadType.MULTIPART enum is 1
-      fieldName: 'audio'
+    if (typeof audioUri === 'string') {
+      const uploadResult = await FileSystem.uploadAsync(`${API_URL}/voice_command`, audioUri, {
+        httpMethod: 'POST',
+        uploadType: 1, // FileSystemUploadType.MULTIPART enum is 1
+        fieldName: 'audio'
+      });
+      return JSON.parse(uploadResult.body);
+    }
+
+    const form = new FormData();
+    form.append('audio', audioUri, audioUri.name);
+
+    const response = await fetch(`${API_URL}/voice_command`, {
+      method: 'POST',
+      body: form,
     });
-    return JSON.parse(uploadResult.body);
+
+    if (!response.ok) {
+      throw new Error(`Serveur ${response.status}`);
+    }
+    return await response.json();
   } catch (error) {
     console.error("API Error (voice_command):", error);
     throw error;

@@ -46,11 +46,15 @@ interface Message {
 const SUGGESTIONS = ['Relevé de notes', 'Manger sur le campus', 'Carte étudiante', 'Orientation & stage'];
 
 // ─── Helper : upload audio via XMLHttpRequest (évite le bug fetch/FormData Expo)
-function uploadAudio(uri: string, currentNode: string): Promise<VoiceAskResponse> {
+function uploadAudio(uri: string | File, currentNode: string): Promise<VoiceAskResponse> {
   return new Promise((resolve, reject) => {
     const xhr  = new XMLHttpRequest();
     const form = new FormData();
-    form.append('audio',        { uri, type: 'audio/m4a', name: 'query.m4a' } as any);
+    if (uri instanceof File) {
+      form.append('audio', uri, uri.name);
+    } else {
+      form.append('audio',        { uri, type: 'audio/m4a', name: 'query.m4a' } as any);
+    }
     form.append('current_node', currentNode);
 
     xhr.open('POST', `${API_URL}/ask/voice`);
@@ -168,7 +172,7 @@ export default function AskScreen() {
   };
 
   // ─── Envoi audio → /ask/voice ─────────────────────────────────────────────
-  const handleSpeechEnd = async (audioUri: string) => {
+  const handleSpeechEnd = async (audioUri: string | File) => {
     if (loading) return;
     setLoading(true);
     speak("Analyse en cours...", "normal");
