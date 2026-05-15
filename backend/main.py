@@ -43,21 +43,23 @@ if not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY doit être défini dans backend/.env ou dans les variables d'environnement")
 
 # ─── Nœuds du mall ────────────────────────────────────────────────────────────
-# À synchroniser avec graph_data (graph_data.py / graph.json)
+# Synchronisé avec data/services.json
 MALL_NODES = [
-    "entrance",       # Entrée principale
-    "hall",           # Hall central
-    "food_court",     # Restauration
-    "cinema",         # Cinéma
-    "fashion_zone",   # Zone mode (Zara, H&M…)
-    "supermarket",    # Supermarché
-    "pharmacy",       # Pharmacie
-    "atm_zone",       # Distributeurs ATM
-    "kids_zone",      # Espace enfants
-    "parking",        # Parking
-    "restrooms",      # Toilettes / espace de prière
-    "luxury_zone",    # Bijouterie / luxe
-    "sport_zone",     # Articles de sport
+    "entree_principale",  # Entrée Grand Hall
+    "zara",               # Zara
+    "h_m",                # H&M
+    "nike",               # Nike Store
+    "adidas",             # Adidas
+    "gucci",              # Gucci
+    "rolex",              # Rolex
+    "apple_store",        # Apple Store
+    "micromania",         # Micromania-Zing
+    "sephora",            # Sephora
+    "dior_beauty",        # Dior Beauty
+    "starbucks",          # Starbucks Coffee
+    "mcdonalds",          # McDonald's
+    "kfc",                # KFC
+    "pathe",              # Cinéma Pathé
 ]
 
 # ─── Modèles ──────────────────────────────────────────────────────────────────
@@ -74,7 +76,7 @@ class SemanticLocateRequest(BaseModel):
 
 class AskRequest(BaseModel):
     query: str
-    current_node: Optional[str] = "entrance"
+    current_node: Optional[str] = "entree_principale"
 
 class AskResponse(BaseModel):
     answer: str
@@ -176,7 +178,7 @@ Rien d'autre — pas de phrase, pas d'explication."""
         )
         res.raise_for_status()
         node_id = res.json()["choices"][0]["message"]["content"].strip().lower()
-        matched = next((n for n in MALL_NODES if n in node_id), "entrance")
+        matched = next((n for n in MALL_NODES if n in node_id), "entree_principale")
         return {
             "success": True,
             "detected_node_id": matched,
@@ -184,7 +186,7 @@ Rien d'autre — pas de phrase, pas d'explication."""
             "engine": "Groq LLaMA3-8b",
         }
     except Exception as e:
-        return {"success": False, "detected_node_id": "entrance", "error": str(e)}
+        return {"success": False, "detected_node_id": "entree_principale", "error": str(e)}
 
 
 @app.post("/voice_command")
@@ -218,8 +220,8 @@ async def process_voice_command(audio: UploadFile = File(...)):
     if not transcription or len(transcription.strip()) < 2:
         return {
             "transcription": transcription,
-            "extracted_intent": {"from_node": "entrance", "to_node": "food_court"},
-            "navigation": find_path(graph_data, "entrance", "food_court"),
+            "extracted_intent": {"from_node": "entree_principale", "to_node": "mcdonalds"},
+            "navigation": find_path(graph_data, "entree_principale", "mcdonalds"),
         }
 
     nodes_list = ", ".join(MALL_NODES)
@@ -228,7 +230,7 @@ async def process_voice_command(audio: UploadFile = File(...)):
 Espaces disponibles : {nodes_list}.
 À partir de la demande du visiteur, retourne UNIQUEMENT :
 {{"from_node": "ID_depart", "to_node": "ID_destination"}}
-Si le départ n'est pas mentionné, utilise "entrance".
+Si le départ n'est pas mentionné, utilise "entree_principale".
 Choisis l'espace le plus proche sémantiquement parmi la liste fournie."""
 
     try:
@@ -247,8 +249,8 @@ Choisis l'espace le plus proche sémantiquement parmi la liste fournie."""
         )
         res.raise_for_status()
         result    = json.loads(res.json()["choices"][0]["message"]["content"])
-        from_node = result.get("from_node", "entrance")
-        to_node   = result.get("to_node", "food_court")
+        from_node = result.get("from_node", "entree_principale")
+        to_node   = result.get("to_node", "mcdonalds")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"LLM Error: {e}")
 
@@ -279,15 +281,20 @@ def handle_navigate(request: NavigateRequest):
 
 @app.get("/stores")
 def get_stores():
-    """Liste des enseignes et espaces du mall."""
+    """Liste des enseignes et espaces du mall — chargée depuis services.json."""
+    services_file = BASE_DIR / "data" / "services.json"
+    with open(services_file, "r", encoding="utf-8") as f:
+        services = json.load(f)
     return [
-        {"id": "zara",        "name": "Zara",              "category": "Mode",         "floor": 1, "node_id": "fashion_zone",  "status": "Ouvert"},
-        {"id": "carrefour",   "name": "Carrefour",         "category": "Supermarché",  "floor": 0, "node_id": "supermarket",   "status": "Ouvert"},
-        {"id": "mcdo",        "name": "McDonald's",        "category": "Restauration", "floor": 2, "node_id": "food_court",    "status": "Ouvert"},
-        {"id": "megaplex",    "name": "Cinéma Megaplex",   "category": "Cinéma",       "floor": 3, "node_id": "cinema",        "status": "Ouvert"},
-        {"id": "decathlon",   "name": "Décathlon",         "category": "Sport",        "floor": 1, "node_id": "sport_zone",    "status": "Ouvert"},
-        {"id": "pharmacie",   "name": "Pharmacie du Mall", "category": "Santé",        "floor": 0, "node_id": "pharmacy",      "status": "Ouvert"},
-        {"id": "bijouterie",  "name": "Excellence Bijoux", "category": "Luxe",         "floor": 1, "node_id": "luxury_zone",   "status": "Ouvert"},
+        {
+            "id":       s["id"],
+            "name":     s["name"],
+            "category": s["categorie"],
+            "node_id":  s["node_id"],
+            "horaires": s.get("horaires", ""),
+            "status":   "Ouvert",
+        }
+        for s in services
     ]
 
 
@@ -295,21 +302,22 @@ def get_stores():
 def get_promotions():
     """Promotions et événements en cours dans le mall."""
     return [
-        {"id": 1, "store": "Zara",          "title": "Soldes été -30%",         "valid_until": "2026-06-30"},
-        {"id": 2, "store": "Carrefour",     "title": "Fruits & légumes offre",  "valid_until": "2026-05-20"},
-        {"id": 3, "store": "Cinéma Megaplex","title": "Mardi -50% sur billets", "valid_until": "2026-12-31"},
-        {"id": 4, "store": "Décathlon",     "title": "Kit running à 299 MAD",   "valid_until": "2026-05-31"},
+        {"id": 1, "store": "Zara",          "title": "Soldes été -30%",              "valid_until": "2026-06-30"},
+        {"id": 2, "store": "H&M",           "title": "Promo collections capsules",   "valid_until": "2026-05-20"},
+        {"id": 3, "store": "Cinéma Pathé",  "title": "Mardi -50% sur billets",       "valid_until": "2026-12-31"},
+        {"id": 4, "store": "Adidas",        "title": "Kit running à 299 MAD",        "valid_until": "2026-05-31"},
+        {"id": 5, "store": "Sephora",       "title": "Échantillons gratuits -20%",   "valid_until": "2026-06-15"},
     ]
 
 
 @app.get("/emergency")
 def get_emergency():
     return {
-        "security":     "Sécurité mall : 05 35 00 11 22",
-        "medical":      "Premiers secours : 05 35 00 33 44",
-        "fire":         "15",
-        "police":       "19",
-        "lost_found":   "Objets trouvés — Accueil central : Niveau 0",
+        "security":   "Sécurité mall : 05 35 00 11 22",
+        "medical":    "Premiers secours : 05 35 00 33 44",
+        "fire":       "15",
+        "police":     "19",
+        "lost_found": "Objets trouvés — Accueil central : Entrée Grand Hall",
     }
 
 
@@ -323,7 +331,7 @@ def get_graph():
 @app.post("/ask", response_model=AskResponse)
 def ask_service(req: AskRequest):
     """RAG mall : question texte → réponse texte avec navigation."""
-    return _rag_answer(req.query, req.current_node or "entrance")
+    return _rag_answer(req.query, req.current_node or "entree_principale")
 
 
 # ==================== /ask/voice — audio → texte + audio =====================
@@ -331,21 +339,13 @@ def ask_service(req: AskRequest):
 @app.post("/ask/voice")
 async def ask_voice(
     audio:        UploadFile    = File(...),
-    current_node: Optional[str] = Form(default="entrance"),
+    current_node: Optional[str] = Form(default="entree_principale"),
 ):
     """
     Flux vocal complet pour le mall :
     1. Audio reçu  →  Whisper (transcription)
     2. Texte       →  RAG vectoriel (boutique / service + navigation)
     3. Réponse     →  Groq TTS (mp3 base64)
-
-    Retourne :
-    {
-      transcription, answer, service_name, horaires,
-      destination_node, navigation,
-      audio_base64 (mp3 en base64),
-      audio_format  ("mp3")
-    }
     """
     # 1. Détecter le format audio
     filename = audio.filename or "query.m4a"
@@ -387,7 +387,7 @@ async def ask_voice(
         )
 
     # 3. RAG mall
-    rag = _rag_answer(transcription, current_node or "entrance")
+    rag = _rag_answer(transcription, current_node or "entree_principale")
 
     # 4. TTS
     audio_b64 = _tts_base64(rag.answer)

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Utiliser l'IP de la machine de dev pour le test sur device physique
 // Remplacer localhost par votre adresse IP locale si test sur vrai téléphone (ex: 192.168.1.10)
-const API_URL = 'http://100.71.97.166:8001';
+const API_URL = 'http://192.168.43.65:8001';
 
 export interface RagResponse {
   office: string;

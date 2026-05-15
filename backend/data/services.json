@@ -1,98 +1,167 @@
 [
   {
-    "id": "info_accueil",
-    "node_id": "entrance",
-    "name": "Accueil & Information",
-    "description": "Point d'information central du mall : plans, renseignements sur les boutiques, objets trouvés, assistance aux visiteurs.",
-    "keywords": ["accueil", "information", "plan", "aide", "renseignement", "objets trouvés"],
-    "horaires": "Lun-Dim 10h-22h"
-  },
-  {
-    "id": "supermarche",
-    "node_id": "supermarket",
-    "name": "Supermarché Carrefour",
-    "description": "Grande surface alimentaire : épicerie, fruits et légumes, boucherie, boulangerie, produits ménagers.",
-    "keywords": ["supermarché", "courses", "alimentation", "épicerie", "nourriture", "carrefour"],
-    "horaires": "Lun-Dim 9h-22h"
-  },
-  {
-    "id": "food_court",
-    "node_id": "food_court",
-    "name": "Food Court",
-    "description": "Espace restauration avec plusieurs enseignes : fast food, pizza, sushi, sandwicherie, café.",
-    "keywords": ["manger", "restaurant", "déjeuner", "pizza", "burger", "café", "repas", "sushi"],
-    "horaires": "Lun-Dim 11h-22h"
-  },
-  {
-    "id": "cinema",
-    "node_id": "cinema",
-    "name": "Cinéma Megaplex",
-    "description": "Complexe cinématographique avec 8 salles, films en VO et VF, séances en 3D et IMAX.",
-    "keywords": ["cinéma", "film", "séance", "billet", "3D", "IMAX", "projection"],
-    "horaires": "Lun-Dim 10h-23h"
+    "id": "entree_principale",
+    "node_id": "entree_principale",
+    "name": "Entrée Grand Hall",
+    "description": "Point d'accès principal du mall. Accueil des visiteurs, plans interactifs, bornes d'information, objets trouvés et assistance. Premier repère de navigation vers toutes les ailes.",
+    "keywords": ["entrée", "accueil", "information", "plan", "aide", "renseignement", "objets trouvés", "hall", "départ"],
+    "horaires": "Lun-Dim 9h-22h",
+    "poids": 0,
+    "categorie": "service",
+    "coords": {"x": 500, "y": 800}
   },
   {
     "id": "zara",
-    "node_id": "fashion_zone",
+    "node_id": "zara",
     "name": "Zara",
-    "description": "Boutique de mode homme, femme et enfant. Collections tendance, vêtements, accessoires.",
-    "keywords": ["vêtements", "mode", "zara", "habits", "femme", "homme", "enfant", "shopping"],
-    "horaires": "Lun-Dim 10h-22h"
+    "description": "Boutique phare de la mode internationale. Collections homme, femme et enfant renouvelées régulièrement. Vêtements tendance, accessoires, sacs et chaussures à prix accessibles. Cabines d'essayage disponibles.",
+    "keywords": ["vêtements", "mode", "zara", "habits", "femme", "homme", "enfant", "shopping", "tendance", "collection", "accessoires"],
+    "horaires": "Lun-Dim 10h-22h",
+    "poids": 3500,
+    "categorie": "mode",
+    "coords": {"x": 400, "y": 600}
   },
   {
-    "id": "pharmacie",
-    "node_id": "pharmacy",
-    "name": "Pharmacie du Mall",
-    "description": "Pharmacie complète : médicaments, parapharmacie, cosmétiques, conseils santé.",
-    "keywords": ["pharmacie", "médicament", "santé", "cosmétique", "soin", "ordonnance"],
-    "horaires": "Lun-Dim 9h-22h"
+    "id": "h_m",
+    "node_id": "h_m",
+    "name": "H&M",
+    "description": "Mode accessible et tendance pour toute la famille. Large gamme de vêtements homme, femme, enfant et bébé. Promotions régulières, collections capsules et ligne H&M Home disponibles.",
+    "keywords": ["vêtements", "mode", "h&m", "promo", "famille", "soldes", "casual", "basiques", "homme", "femme", "enfant", "bébé"],
+    "horaires": "Lun-Dim 10h-22h",
+    "poids": 4000,
+    "categorie": "mode",
+    "coords": {"x": 350, "y": 700}
   },
   {
-    "id": "banque_atm",
-    "node_id": "atm_zone",
-    "name": "Distributeurs ATM",
-    "description": "Zone regroupant plusieurs distributeurs automatiques de billets (CIH, Attijariwafa, BMCE).",
-    "keywords": ["argent", "distributeur", "ATM", "retrait", "banque", "billets", "cash"],
-    "horaires": "24h/24"
+    "id": "nike",
+    "node_id": "nike",
+    "name": "Nike Store",
+    "description": "Concept store officiel Nike. Chaussures de sport et sneakers dernière collection, vêtements running et training, équipements fitness. Espace personnalisation Nike By You disponible en boutique.",
+    "keywords": ["nike", "sport", "sneakers", "chaussures", "running", "training", "fitness", "jordan", "air max", "personnalisation"],
+    "horaires": "Lun-Dim 10h-22h",
+    "poids": 2800,
+    "categorie": "sport",
+    "coords": {"x": 650, "y": 550}
   },
   {
-    "id": "jeux_enfants",
-    "node_id": "kids_zone",
-    "name": "Espace Kids & Jeux",
-    "description": "Zone de jeux pour enfants, manèges, aire de jeux couverte, activités ludiques et éducatives.",
-    "keywords": ["enfants", "jeux", "aire de jeux", "manège", "kids", "activités", "famille"],
-    "horaires": "Lun-Dim 10h-21h30"
+    "id": "adidas",
+    "node_id": "adidas",
+    "name": "Adidas",
+    "description": "Boutique officielle Adidas. Articles de sport et lifestyle : chaussures, vêtements running, football et basketball. Collections Originals et performance. Service de personnalisation disponible.",
+    "keywords": ["adidas", "sport", "sneakers", "chaussures", "lifestyle", "originals", "football", "running", "performance", "ultraboost"],
+    "horaires": "Lun-Dim 10h-22h",
+    "poids": 2200,
+    "categorie": "sport",
+    "coords": {"x": 700, "y": 550}
   },
   {
-    "id": "parking",
-    "node_id": "parking",
-    "name": "Parking du Mall",
-    "description": "Parking souterrain et extérieur, 1500 places, accessible PMR, paiement automatique à la borne.",
-    "keywords": ["parking", "voiture", "stationnement", "place", "payer", "sortie voiture"],
-    "horaires": "Lun-Dim 8h-23h"
+    "id": "gucci",
+    "node_id": "gucci",
+    "name": "Gucci",
+    "description": "Maison de luxe italienne fondée à Florence. Prêt-à-porter homme et femme, maroquinerie iconique, chaussures, bijoux et parfums. Service clientèle personnalisé, emballage cadeau et retouches sur mesure.",
+    "keywords": ["gucci", "luxe", "mode", "maroquinerie", "sac", "prestige", "haute couture", "parfum", "bijoux", "cadeau", "designer"],
+    "horaires": "Lun-Sam 10h-21h, Dim 11h-20h",
+    "poids": 400,
+    "categorie": "luxe",
+    "coords": {"x": 200, "y": 800}
   },
   {
-    "id": "toilettes",
-    "node_id": "restrooms",
-    "name": "Toilettes & Espace de Prière",
-    "description": "Sanitaires publics propres à chaque niveau, espace de prière séparé homme/femme, accessible PMR.",
-    "keywords": ["toilettes", "WC", "sanitaires", "prière", "mosquée", "ablutions", "PMR"],
-    "horaires": "Lun-Dim 9h-22h30"
+    "id": "rolex",
+    "node_id": "rolex",
+    "name": "Rolex",
+    "description": "Horlogerie suisse de prestige absolu. Montres Oyster, Datejust, Submariner et GMT-Master. Service après-vente officiel, authentification, révision et entretien. Achat sur rendez-vous recommandé.",
+    "keywords": ["rolex", "montre", "luxe", "horlogerie", "suisse", "prestige", "cadeau", "submariner", "datejust", "investissement"],
+    "horaires": "Lun-Sam 10h-20h, Dim 11h-19h",
+    "poids": 150,
+    "categorie": "luxe",
+    "coords": {"x": 150, "y": 800}
   },
   {
-    "id": "bijouterie",
-    "node_id": "luxury_zone",
-    "name": "Bijouterie Excellence",
-    "description": "Bijoux en or, argent, montres de marque, gravure personnalisée, service cadeau.",
-    "keywords": ["bijoux", "or", "montre", "bague", "cadeau", "argent", "bijouterie"],
-    "horaires": "Lun-Dim 10h-21h"
+    "id": "apple_store",
+    "node_id": "apple_store",
+    "name": "Apple Store",
+    "description": "Store officiel Apple. iPhone, iPad, Mac, Apple Watch et accessoires. Genius Bar pour support technique, ateliers Today at Apple gratuits, reprise d'anciens appareils et activation sur place.",
+    "keywords": ["apple", "iphone", "mac", "ipad", "airpods", "tech", "réparation", "genius bar", "macbook", "watch", "support"],
+    "horaires": "Lun-Dim 10h-22h",
+    "poids": 5000,
+    "categorie": "tech",
+    "coords": {"x": 600, "y": 650}
   },
   {
-    "id": "sport",
-    "node_id": "sport_zone",
-    "name": "Décathlon Sport",
-    "description": "Articles de sport toutes disciplines : vêtements, chaussures, équipements fitness, outdoor.",
-    "keywords": ["sport", "fitness", "chaussures", "vélo", "football", "décathlon", "running"],
-    "horaires": "Lun-Dim 9h-22h"
+    "id": "micromania",
+    "node_id": "micromania",
+    "name": "Micromania-Zing",
+    "description": "Spécialiste du jeu vidéo et de la culture geek. Jeux PS5, Xbox, Nintendo Switch, PC gaming. Figurines, mangas, goodies, cartes à collectionner. Reprise et échange de jeux d'occasion.",
+    "keywords": ["jeux vidéo", "gaming", "ps5", "xbox", "nintendo", "switch", "figurines", "geek", "mangas", "occasion", "goodies"],
+    "horaires": "Lun-Dim 10h-21h30",
+    "poids": 900,
+    "categorie": "gaming",
+    "coords": {"x": 700, "y": 250}
+  },
+  {
+    "id": "sephora",
+    "node_id": "sephora",
+    "name": "Sephora",
+    "description": "Référence mondiale de la beauté et des cosmétiques. Plus de 300 marques : parfums, maquillage, soins visage et corps. Conseillères beauté disponibles, diagnostics peau, ateliers maquillage et programme fidélité Beauty Insider.",
+    "keywords": ["beauté", "parfum", "maquillage", "cosmétiques", "soin", "skincare", "rouge à lèvres", "fond de teint", "sephora", "crème"],
+    "horaires": "Lun-Dim 10h-22h",
+    "poids": 3200,
+    "categorie": "beaute",
+    "coords": {"x": 400, "y": 400}
+  },
+  {
+    "id": "dior_beauty",
+    "node_id": "dior_beauty",
+    "name": "Dior Beauty",
+    "description": "Espace beauté de la maison Christian Dior. Parfums iconiques (J'adore, Miss Dior, Sauvage), maquillage haute couture, soins visage Capture Totale. Conseillères expertes, diagnostics personnalisés et coffrets cadeaux.",
+    "keywords": ["dior", "luxe", "parfum", "maquillage", "soin", "j'adore", "miss dior", "sauvage", "beauté", "cadeau", "crème", "prestige"],
+    "horaires": "Lun-Dim 10h-21h",
+    "poids": 600,
+    "categorie": "beaute",
+    "coords": {"x": 350, "y": 400}
+  },
+  {
+    "id": "starbucks",
+    "node_id": "starbucks",
+    "name": "Starbucks Coffee",
+    "description": "Café américain emblématique. Cafés chauds et froids (Latte, Frappuccino, Cold Brew), thés, jus et snacks. Boissons personnalisables, Wi-Fi gratuit, ambiance cosy pour une pause shopping.",
+    "keywords": ["café", "starbucks", "boisson", "latte", "frappuccino", "thé", "pause", "wi-fi", "snack", "emporter", "cold brew"],
+    "horaires": "Lun-Dim 9h-22h",
+    "poids": 2500,
+    "categorie": "food",
+    "coords": {"x": 400, "y": 250}
+  },
+  {
+    "id": "mcdonalds",
+    "node_id": "mcdonalds",
+    "name": "McDonald's",
+    "description": "Restaurant de restauration rapide incontournable. Burgers, McNuggets, menus enfants Happy Meal, salades, desserts McFlurry. Bornes de commande digitales, service McDrive, livraison disponible.",
+    "keywords": ["mcdonalds", "burger", "fast food", "happy meal", "mcnuggets", "frites", "déjeuner", "rapide", "enfants", "mcflurry"],
+    "horaires": "Lun-Dim 9h-23h",
+    "poids": 6000,
+    "categorie": "food",
+    "coords": {"x": 500, "y": 50}
+  },
+  {
+    "id": "kfc",
+    "node_id": "kfc",
+    "name": "KFC",
+    "description": "Spécialiste mondial du poulet frit croustillant. Menus Bucket, Twister, sandwichs, wings et tenders. Sauces maison, accompagnements coleslaw et purée. Commande via borne ou comptoir, à emporter ou sur place.",
+    "keywords": ["kfc", "poulet", "fried chicken", "bucket", "wings", "fast food", "tenders", "twister", "croustillant", "repas"],
+    "horaires": "Lun-Dim 10h-23h",
+    "poids": 3800,
+    "categorie": "food",
+    "coords": {"x": 600, "y": 150}
+  },
+  {
+    "id": "pathe",
+    "node_id": "pathe",
+    "name": "Cinéma Pathé",
+    "description": "Complexe cinématographique moderne avec 10 salles dont 2 salles IMAX et 1 salle 4DX. Films en VO et VF, avant-premières, séances nocturnes le week-end. Réservation en ligne, pass illimité accepté, snack-bar avec popcorn et boissons.",
+    "keywords": ["cinéma", "film", "séance", "imax", "4dx", "billet", "vo", "vf", "popcorn", "pathé", "avant-première", "réservation"],
+    "horaires": "Lun-Dim 10h-00h",
+    "poids": 4500,
+    "categorie": "loisir",
+    "coords": {"x": 500, "y": 150}
   }
 ]

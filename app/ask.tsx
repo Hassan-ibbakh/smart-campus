@@ -12,7 +12,7 @@ import BottomNav from '../components/BottomNav';
 import VoiceButton from '../components/VoiceButton';
 import { useSpeech } from '../hooks/useSpeech';
 
-const API_URL = 'http://100.71.97.166:8081';
+const API_URL = 'http://192.168.43.65:8081';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface NavStep { instruction: string; distance?: number; }
@@ -45,10 +45,10 @@ interface Message {
 const SUGGESTIONS = [
   'Où manger ?',
   'Trouver Zara',
-  'Distributeur ATM',
-  'Cinéma — séances',
-  'Espace enfants',
-  'Pharmacie',
+  'Apple Store',
+  'Cinéma Pathé',
+  'Parfums Sephora',
+  'Nike ou Adidas ?',
 ];
 
 // ─── Upload audio ─────────────────────────────────────────────────────────────
@@ -155,7 +155,7 @@ export default function AskScreen() {
       const res = await fetch(`${API_URL}/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: trimmed, current_node: 'entrance' }),
+        body: JSON.stringify({ query: trimmed, current_node: 'entree_principale' }),
       });
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const data: AskResponse = await res.json();
@@ -182,7 +182,7 @@ export default function AskScreen() {
     speak("Recherche en cours...", "normal");
 
     try {
-      const data = await uploadAudio(audioUri, 'entrance');
+      const data = await uploadAudio(audioUri, 'entree_principale');
 
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
@@ -225,9 +225,7 @@ export default function AskScreen() {
     }
   };
 
-  // ─── Navigation → /navigate avec steps ────────────────────────────────────
-  // CORRECTION : on passe maintenant steps + path + total_distance
-  // pour que NavigateScreen les charge dès l'arrivée sur la page.
+  // ─── Navigation → /navigate ───────────────────────────────────────────────
   const handleNavigate = (r: AskResponse) => {
     if (!r.navigation) return;
 
@@ -311,7 +309,7 @@ export default function AskScreen() {
             </View>
           )}
 
-          {/* ── Bouton M'Y GUIDER ── affiché si navigation disponible */}
+          {/* Bouton M'Y GUIDER */}
           {r?.navigation && (
             <TouchableOpacity
               style={styles.navBtn}

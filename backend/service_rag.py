@@ -10,7 +10,6 @@ CHROMA_DIR    = os.path.join(BASE_DIR, "chroma_services")
 
 # ─── Modèle (meilleur sur le français que distiluse) ─────────────────────────
 MODEL_NAME = "paraphrase-multilingual-mpnet-base-v2"
-
 _model      = None
 _collection = None
 

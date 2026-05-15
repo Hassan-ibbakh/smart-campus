@@ -151,15 +151,6 @@ cd ..
 npx expo start -c
 ```
 
-### 5. Lancement du Frontend
-```bash
-# Retourner à la racine du projet
-cd ..
-
-# Lancer Expo
-npx expo start -c
-```
-
 ---
 
 ## 📱 Test sur Appareil Mobile
