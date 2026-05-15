@@ -1,42 +1,98 @@
 [
   {
-    "id": "scolarite",
-    "node_id": "scolarite",
-    "name": "Scolarité centrale",
-    "description": "Délivrance des certificats de scolarité, relevés de notes, attestations de réussite, inscriptions administratives.",
-    "keywords": ["certificat", "attestation", "notes", "inscription", "réinscription"],
-    "horaires": "Lun-Ven 9h-12h, 14h-16h"
+    "id": "info_accueil",
+    "node_id": "entrance",
+    "name": "Accueil & Information",
+    "description": "Point d'information central du mall : plans, renseignements sur les boutiques, objets trouvés, assistance aux visiteurs.",
+    "keywords": ["accueil", "information", "plan", "aide", "renseignement", "objets trouvés"],
+    "horaires": "Lun-Dim 10h-22h"
   },
   {
-    "id": "bibliotheque",
-    "node_id": "hall",
-    "name": "Bibliothèque universitaire",
-    "description": "Prêt de livres, accès aux ressources numériques, salles de travail, reprographie.",
-    "keywords": ["livre", "emprunt", "étudier", "photocopie"],
-    "horaires": "Lun-Sam 8h-20h"
+    "id": "supermarche",
+    "node_id": "supermarket",
+    "name": "Supermarché Carrefour",
+    "description": "Grande surface alimentaire : épicerie, fruits et légumes, boucherie, boulangerie, produits ménagers.",
+    "keywords": ["supermarché", "courses", "alimentation", "épicerie", "nourriture", "carrefour"],
+    "horaires": "Lun-Dim 9h-22h"
   },
   {
-    "id": "resto_u",
-    "node_id": "cafeteria",
-    "name": "Restaurant universitaire",
-    "description": "Repas abordables, tickets restaurant, menu végétarien.",
-    "keywords": ["manger", "déjeuner", "cafétéria", "repas"],
-    "horaires": "11h30-14h"
+    "id": "food_court",
+    "node_id": "food_court",
+    "name": "Food Court",
+    "description": "Espace restauration avec plusieurs enseignes : fast food, pizza, sushi, sandwicherie, café.",
+    "keywords": ["manger", "restaurant", "déjeuner", "pizza", "burger", "café", "repas", "sushi"],
+    "horaires": "Lun-Dim 11h-22h"
   },
   {
-    "id": "carte_etudiant",
-    "node_id": "scolarite",
-    "name": "Carte d'étudiant",
-    "description": "Fabrication et renouvellement de la carte d'étudiant (photo, identité).",
-    "keywords": ["carte étudiant", "carte d'identité étudiante", "photo", "badge"],
-    "horaires": "Lun-Jeu 9h-17h"
+    "id": "cinema",
+    "node_id": "cinema",
+    "name": "Cinéma Megaplex",
+    "description": "Complexe cinématographique avec 8 salles, films en VO et VF, séances en 3D et IMAX.",
+    "keywords": ["cinéma", "film", "séance", "billet", "3D", "IMAX", "projection"],
+    "horaires": "Lun-Dim 10h-23h"
   },
   {
-    "id": "orientation",
-    "node_id": "direction",
-    "name": "Cellule d'orientation",
-    "description": "Conseils en parcours, aides à l'insertion professionnelle, choix de filière.",
-    "keywords": ["orientation", "conseil", "filière", "métier", "stage"],
-    "horaires": "Mercredi 9h-12h"
+    "id": "zara",
+    "node_id": "fashion_zone",
+    "name": "Zara",
+    "description": "Boutique de mode homme, femme et enfant. Collections tendance, vêtements, accessoires.",
+    "keywords": ["vêtements", "mode", "zara", "habits", "femme", "homme", "enfant", "shopping"],
+    "horaires": "Lun-Dim 10h-22h"
+  },
+  {
+    "id": "pharmacie",
+    "node_id": "pharmacy",
+    "name": "Pharmacie du Mall",
+    "description": "Pharmacie complète : médicaments, parapharmacie, cosmétiques, conseils santé.",
+    "keywords": ["pharmacie", "médicament", "santé", "cosmétique", "soin", "ordonnance"],
+    "horaires": "Lun-Dim 9h-22h"
+  },
+  {
+    "id": "banque_atm",
+    "node_id": "atm_zone",
+    "name": "Distributeurs ATM",
+    "description": "Zone regroupant plusieurs distributeurs automatiques de billets (CIH, Attijariwafa, BMCE).",
+    "keywords": ["argent", "distributeur", "ATM", "retrait", "banque", "billets", "cash"],
+    "horaires": "24h/24"
+  },
+  {
+    "id": "jeux_enfants",
+    "node_id": "kids_zone",
+    "name": "Espace Kids & Jeux",
+    "description": "Zone de jeux pour enfants, manèges, aire de jeux couverte, activités ludiques et éducatives.",
+    "keywords": ["enfants", "jeux", "aire de jeux", "manège", "kids", "activités", "famille"],
+    "horaires": "Lun-Dim 10h-21h30"
+  },
+  {
+    "id": "parking",
+    "node_id": "parking",
+    "name": "Parking du Mall",
+    "description": "Parking souterrain et extérieur, 1500 places, accessible PMR, paiement automatique à la borne.",
+    "keywords": ["parking", "voiture", "stationnement", "place", "payer", "sortie voiture"],
+    "horaires": "Lun-Dim 8h-23h"
+  },
+  {
+    "id": "toilettes",
+    "node_id": "restrooms",
+    "name": "Toilettes & Espace de Prière",
+    "description": "Sanitaires publics propres à chaque niveau, espace de prière séparé homme/femme, accessible PMR.",
+    "keywords": ["toilettes", "WC", "sanitaires", "prière", "mosquée", "ablutions", "PMR"],
+    "horaires": "Lun-Dim 9h-22h30"
+  },
+  {
+    "id": "bijouterie",
+    "node_id": "luxury_zone",
+    "name": "Bijouterie Excellence",
+    "description": "Bijoux en or, argent, montres de marque, gravure personnalisée, service cadeau.",
+    "keywords": ["bijoux", "or", "montre", "bague", "cadeau", "argent", "bijouterie"],
+    "horaires": "Lun-Dim 10h-21h"
+  },
+  {
+    "id": "sport",
+    "node_id": "sport_zone",
+    "name": "Décathlon Sport",
+    "description": "Articles de sport toutes disciplines : vêtements, chaussures, équipements fitness, outdoor.",
+    "keywords": ["sport", "fitness", "chaussures", "vélo", "football", "décathlon", "running"],
+    "horaires": "Lun-Dim 9h-22h"
   }
 ]

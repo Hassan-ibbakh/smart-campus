@@ -12,8 +12,7 @@ import BottomNav from '../components/BottomNav';
 import VoiceButton from '../components/VoiceButton';
 import { useSpeech } from '../hooks/useSpeech';
 
-// ─── IP de votre PC ───────────────────────────────────────────────────────────
-const API_URL = 'http://100.121.192.82:8081';
+const API_URL = 'http://100.71.97.166:8081';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface NavStep { instruction: string; distance?: number; }
@@ -43,22 +42,30 @@ interface Message {
   audioB64?: string;
 }
 
-const SUGGESTIONS = ['Relevé de notes', 'Manger sur le campus', 'Carte étudiante', 'Orientation & stage'];
+const SUGGESTIONS = [
+  'Où manger ?',
+  'Trouver Zara',
+  'Distributeur ATM',
+  'Cinéma — séances',
+  'Espace enfants',
+  'Pharmacie',
+];
 
-// ─── Helper : upload audio via XMLHttpRequest (évite le bug fetch/FormData Expo)
+// ─── Upload audio ─────────────────────────────────────────────────────────────
 function uploadAudio(uri: string | File, currentNode: string): Promise<VoiceAskResponse> {
   return new Promise((resolve, reject) => {
     const xhr  = new XMLHttpRequest();
     const form = new FormData();
+
     if (uri instanceof File) {
-      form.append('audio', uri, uri.name);
+      form.append('audio', uri, 'query.webm');
     } else {
-      form.append('audio',        { uri, type: 'audio/m4a', name: 'query.m4a' } as any);
+      form.append('audio', { uri, type: 'audio/m4a', name: 'query.m4a' } as any);
     }
     form.append('current_node', currentNode);
 
     xhr.open('POST', `${API_URL}/ask/voice`);
-    xhr.timeout = 30000;
+    xhr.timeout = 60000;
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
@@ -74,6 +81,7 @@ function uploadAudio(uri: string | File, currentNode: string): Promise<VoiceAskR
   });
 }
 
+// ─── Composant principal ──────────────────────────────────────────────────────
 export default function AskScreen() {
   const router    = useRouter();
   const { speak } = useSpeech();
@@ -85,34 +93,31 @@ export default function AskScreen() {
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [messages,  setMessages]  = useState<Message[]>([
-    { id: 'welcome', type: 'bot', text: "Bonjour ! Tapez ou parlez pour trouver un service du campus." },
+    {
+      id: 'welcome',
+      type: 'bot',
+      text: "Bonjour ! Tapez ou parlez pour trouver une boutique, un service ou un espace du mall. 🛍️",
+    },
   ]);
 
   const scrollToBottom = () =>
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 120);
 
-  // ─── Lecture audio base64 (expo-av) ───────────────────────────────────────
+  // ─── Audio base64 ──────────────────────────────────────────────────────────
   const playAudio = async (msgId: string, b64: string) => {
     try {
-      // Arrêter l'audio précédent
       if (soundRef.current) {
         await soundRef.current.stopAsync();
         await soundRef.current.unloadAsync();
         soundRef.current = null;
       }
       setPlayingId(msgId);
-
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        allowsRecordingIOS: false,
-      });
-
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, allowsRecordingIOS: false });
       const { sound } = await Audio.Sound.createAsync(
         { uri: `data:audio/mp3;base64,${b64}` },
         { shouldPlay: true },
       );
       soundRef.current = sound;
-
       sound.setOnPlaybackStatusUpdate(status => {
         if (status.isLoaded && status.didJustFinish) {
           setPlayingId(null);
@@ -123,7 +128,6 @@ export default function AskScreen() {
     } catch (e) {
       console.error('[Audio]', e);
       setPlayingId(null);
-      // Fallback synthèse vocale native
       const msg = messages.find(m => m.id === msgId);
       if (msg) speak(msg.text, 'normal');
     }
@@ -175,12 +179,11 @@ export default function AskScreen() {
   const handleSpeechEnd = async (audioUri: string | File) => {
     if (loading) return;
     setLoading(true);
-    speak("Analyse en cours...", "normal");
+    speak("Recherche en cours...", "normal");
 
     try {
       const data = await uploadAudio(audioUri, 'entrance');
 
-      // Bulle utilisateur : transcription
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         type: 'user',
@@ -189,7 +192,6 @@ export default function AskScreen() {
       }]);
       scrollToBottom();
 
-      // Bulle bot : réponse
       const botId = (Date.now() + 1).toString();
       setMessages(prev => [...prev, {
         id: botId,
@@ -197,21 +199,19 @@ export default function AskScreen() {
         text: data.answer,
         audioB64: data.audio_base64 ?? undefined,
         response: {
-          answer: data.answer,
+          answer:           data.answer,
           destination_node: data.destination_node,
-          service_name: data.service_name,
-          horaires: data.horaires,
-          navigation: data.navigation,
+          service_name:     data.service_name,
+          horaires:         data.horaires,
+          navigation:       data.navigation,
         },
       }]);
 
-      // Jouer l'audio automatiquement
       if (data.audio_base64) {
         await playAudio(botId, data.audio_base64);
       } else {
         speak(data.answer, 'normal');
       }
-
     } catch (e: any) {
       console.error('[VoiceRAG]', e.message);
       setMessages(prev => [...prev, {
@@ -225,21 +225,28 @@ export default function AskScreen() {
     }
   };
 
-  // ─── Navigation ────────────────────────────────────────────────────────────
+  // ─── Navigation → /navigate avec steps ────────────────────────────────────
+  // CORRECTION : on passe maintenant steps + path + total_distance
+  // pour que NavigateScreen les charge dès l'arrivée sur la page.
   const handleNavigate = (r: AskResponse) => {
     if (!r.navigation) return;
+
     speak(`Je vous guide vers ${r.service_name}`, 'high');
+
     router.push({
       pathname: '/navigate',
       params: {
-        destination: r.destination_node ?? '',
-        steps: JSON.stringify(r.navigation.steps),
+        destination:           r.destination_node ?? '',
+        service_name:          r.service_name ?? '',
+        steps:                 JSON.stringify(r.navigation.steps),
+        path:                  JSON.stringify(r.navigation.path),
+        total_distance:        String(r.navigation.total_distance ?? 0),
         enhancedAccessibility: 'false',
       },
     });
   };
 
-  // ─── Rendu message ─────────────────────────────────────────────────────────
+  // ─── Rendu d'un message ────────────────────────────────────────────────────
   const renderMessage = (msg: Message) => {
     const isUser    = msg.type === 'user';
     const r         = msg.response;
@@ -249,12 +256,11 @@ export default function AskScreen() {
       <View key={msg.id} style={[styles.msgRow, isUser ? styles.msgRowUser : styles.msgRowBot]}>
         {!isUser && (
           <View style={styles.avatar}>
-            <Ionicons name="school" size={14} color="#fff" />
+            <Ionicons name="bag-handle" size={14} color="#fff" />
           </View>
         )}
 
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleBot]}>
-          {/* Badge vocal */}
           {msg.isVoice && (
             <View style={styles.voiceTag}>
               <Ionicons name="mic" size={11} color="#fff" />
@@ -264,7 +270,7 @@ export default function AskScreen() {
 
           <Text style={isUser ? styles.textUser : styles.textBot}>{msg.text}</Text>
 
-          {/* Bouton écouter / arrêter */}
+          {/* Bouton écouter */}
           {!isUser && msg.audioB64 && (
             <TouchableOpacity
               style={[styles.audioBtn, isPlaying && styles.audioBtnActive]}
@@ -279,17 +285,15 @@ export default function AskScreen() {
               <Text style={[styles.audioBtnText, isPlaying && { color: '#fff' }]}>
                 {isPlaying ? "Arrêter" : "Écouter"}
               </Text>
-              {isPlaying && (
-                <ActivityIndicator size="small" color="#fff" style={{ marginLeft: 2 }} />
-              )}
+              {isPlaying && <ActivityIndicator size="small" color="#fff" style={{ marginLeft: 2 }} />}
             </TouchableOpacity>
           )}
 
-          {/* Infos service */}
+          {/* Infos boutique */}
           {r?.service_name && (
             <View style={styles.infoBox}>
               <View style={styles.infoRow}>
-                <Ionicons name="location-outline" size={13} color="#2563EB" />
+                <Ionicons name="storefront-outline" size={13} color="#2563EB" />
                 <Text style={styles.infoText}>{r.service_name}</Text>
               </View>
               {r.horaires && (
@@ -307,6 +311,7 @@ export default function AskScreen() {
             </View>
           )}
 
+          {/* ── Bouton M'Y GUIDER ── affiché si navigation disponible */}
           {r?.navigation && (
             <TouchableOpacity
               style={styles.navBtn}
@@ -314,7 +319,7 @@ export default function AskScreen() {
               activeOpacity={0.8}
             >
               <Ionicons name="navigate" size={14} color="#fff" />
-              <Text style={styles.navBtnText}>INITIALIZE ROUTE</Text>
+              <Text style={styles.navBtnText}>M'Y GUIDER</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -333,8 +338,8 @@ export default function AskScreen() {
           <Ionicons name="arrow-back" size={20} color="#1E293B" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerSub}>SERVICE FINDER</Text>
-          <Text style={styles.headerTitle}>ASSISTANT CAMPUS</Text>
+          <Text style={styles.headerSub}>STORE FINDER</Text>
+          <Text style={styles.headerTitle}>ASSISTANT MALL</Text>
         </View>
         <View style={styles.statusBadge}>
           <View style={styles.statusDot} />
@@ -355,14 +360,15 @@ export default function AskScreen() {
           showsVerticalScrollIndicator={false}
         >
           {messages.map(renderMessage)}
+
           {loading && (
             <View style={[styles.msgRow, styles.msgRowBot]}>
               <View style={styles.avatar}>
-                <Ionicons name="school" size={14} color="#fff" />
+                <Ionicons name="bag-handle" size={14} color="#fff" />
               </View>
               <View style={[styles.bubble, styles.bubbleBot, styles.loadingBubble]}>
                 <ActivityIndicator size="small" color="#2563EB" />
-                <Text style={styles.loadingText}>RAG SCANNING...</Text>
+                <Text style={styles.loadingText}>RECHERCHE EN COURS...</Text>
               </View>
             </View>
           )}
@@ -384,9 +390,8 @@ export default function AskScreen() {
           </ScrollView>
         )}
 
-        {/* Barre d'input */}
+        {/* Barre de saisie */}
         <View style={styles.inputBar}>
-          {/* Toggle texte / voix */}
           <View style={styles.modeToggle}>
             <TouchableOpacity
               style={[styles.modeBtn, inputMode === 'text' && styles.modeBtnActive]}
@@ -406,7 +411,7 @@ export default function AskScreen() {
             <>
               <TextInput
                 style={styles.input}
-                placeholder="Ex : Où obtenir mon relevé de notes ?"
+                placeholder="Ex : Où trouver une pharmacie ?"
                 placeholderTextColor="#94A3B8"
                 value={query}
                 onChangeText={setQuery}
@@ -426,7 +431,7 @@ export default function AskScreen() {
             <View style={styles.voiceZone}>
               <View>
                 <Text style={styles.voiceHint}>Appuyez et parlez</Text>
-                <Text style={styles.voiceSubHint}>Vous recevrez une réponse audio 🔊</Text>
+                <Text style={styles.voiceSubHint}>Je vous guide jusqu'à la boutique 🔊</Text>
               </View>
               <View style={styles.voiceButtonWrap}>
                 <VoiceButton onSpeechEnd={handleSpeechEnd} />
@@ -485,9 +490,9 @@ const styles = StyleSheet.create({
   chip:        { backgroundColor: 'rgba(37,99,235,0.07)', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(37,99,235,0.2)' },
   chipText:    { color: '#2563EB', fontSize: 12, fontWeight: '700' },
 
-  inputBar:    { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingTop: 10, paddingBottom: 100, backgroundColor: '#F8FAFC' },
-  modeToggle:  { flexDirection: 'row', backgroundColor: '#E2E8F0', borderRadius: 20, padding: 2, gap: 2 },
-  modeBtn:     { width: 30, height: 30, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  inputBar:      { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingTop: 10, paddingBottom: 100, backgroundColor: '#F8FAFC' },
+  modeToggle:    { flexDirection: 'row', backgroundColor: '#E2E8F0', borderRadius: 20, padding: 2, gap: 2 },
+  modeBtn:       { width: 30, height: 30, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   modeBtnActive: { backgroundColor: '#2563EB', shadowColor: '#2563EB', shadowOpacity: 0.3, shadowRadius: 6, elevation: 3 },
 
   input:      { flex: 1, backgroundColor: '#fff', borderRadius: 22, paddingHorizontal: 16, paddingVertical: 10, fontSize: 14, color: '#1E293B', borderWidth: 1, borderColor: 'rgba(0,0,0,0.07)' },
