@@ -1,16 +1,6 @@
+import { API_URL } from '../config';
 import axios from 'axios';
-
-// Utiliser l'IP de la machine de dev pour le test sur device physique
-// Remplacer localhost par votre adresse IP locale si test sur vrai téléphone (ex: 192.168.1.10)
-const API_URL = 'http://100.71.97.166:8001';
-
-export interface RagResponse {
-  office: string;
-  node_id: string;
-  floor: number;
-  description: string;
-  rag_excerpt: string;
-}
+import * as FileSystem from 'expo-file-system';
 
 export interface NavigationStep {
   id: string;
@@ -29,23 +19,76 @@ export interface NavigationResponse {
   steps: NavigationStep[];
 }
 
-export const fetchBuildings = async () => {
+export interface AskResponse {
+  transcription: string;
+  answer: string;
+  destination_node?: string;
+  service_name?: string;
+  horaires?: string;
+  navigation?: NavigationResponse;
+  audio_base64?: string;
+  audio_format?: string;
+  promotion?: string;
+}
+
+export interface RagResponse extends AskResponse {
+  office?: string;
+  description?: string;
+  rag_excerpt?: string;
+}
+
+export const queryApi = async (query: string, currentNode: string = 'entrance'): Promise<RagResponse> => {
   try {
-    const response = await axios.get(`${API_URL}/buildings`);
+    const response = await axios.post(`${API_URL}/ask`, {
+      query,
+      current_node: currentNode
+    });
     return response.data;
   } catch (error) {
-    console.error("API Error (buildings):", error);
-    return [];
+    console.error("API Error (query):", error);
+    throw error;
   }
 };
 
-export const fetchHistory = async () => {
+export const updatePosition = async (userId: string, nodeId: string, type: 'visitor' | 'resource' = 'visitor') => {
   try {
-    const response = await axios.get(`${API_URL}/history`);
-    return response.data;
+    await axios.post(`${API_URL}/position`, {
+      user_id: userId,
+      node_id: nodeId,
+      timestamp: Date.now() / 1000,
+      type
+    });
   } catch (error) {
-    console.error("API Error (history):", error);
-    return [];
+    console.error("API Error (position):", error);
+  }
+};
+
+export const askVoice = async (audioUri: string, currentNode: string = 'entrance'): Promise<AskResponse> => {
+  try {
+    const uploadResult = await FileSystem.uploadAsync(`${API_URL}/ask/voice`, audioUri, {
+      httpMethod: 'POST',
+      uploadType: 1,
+      fieldName: 'audio',
+      parameters: { current_node: currentNode }
+    });
+    return JSON.parse(uploadResult.body);
+  } catch (error) {
+    console.error("API Error (ask_voice):", error);
+    throw error;
+  }
+};
+
+export const processVoiceCommand = async (audioUri: string) => {
+  try {
+    const uploadResult = await FileSystem.uploadAsync(`${API_URL}/voice_command`, audioUri, {
+      httpMethod: 'POST',
+      uploadType: 1,
+      fieldName: 'audio'
+    });
+    return JSON.parse(uploadResult.body);
+  } catch (error) {
+    console.error("API Error (voice_command):", error);
+    throw error;
   }
 };
 
@@ -59,22 +102,32 @@ export const fetchEmergency = async () => {
   }
 };
 
-export const queryApi = async (query: string): Promise<RagResponse> => {
+export const fetchStores = async () => {
   try {
-    const response = await axios.post(`${API_URL}/query`, { query });
+    const response = await axios.get(`${API_URL}/stores`);
     return response.data;
   } catch (error) {
-    console.error("API Error (query):", error);
-    throw error;
+    console.error("API Error (stores):", error);
+    return [];
+  }
+};
+
+export const fetchPromotions = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/promotions`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error (promotions):", error);
+    return [];
   }
 };
 
 export const navigateApi = async (from_node: string, to_node: string, accessible: boolean = false): Promise<NavigationResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/navigate`, { 
-      from_node, 
-      to_node, 
-      accessible 
+    const response = await axios.post(`${API_URL}/navigate`, {
+      from_node,
+      to_node,
+      accessible
     });
     return response.data;
   } catch (error) {
@@ -90,46 +143,5 @@ export const getGraphApi = async () => {
   } catch (error) {
     console.error("API Error (graph):", error);
     return null;
-  }
-};
-
-export const locateSemantically = async (description: string) => {
-  try {
-    const response = await axios.post(`${API_URL}/locate_semantically`, { description });
-    return response.data;
-  } catch (error) {
-    console.error("API Error (locate_semantically):", error);
-    throw error;
-  }
-};
-
-import * as FileSystem from 'expo-file-system/legacy';
-
-export const processVoiceCommand = async (audioUri: string | File) => {
-  try {
-    if (typeof audioUri === 'string') {
-      const uploadResult = await FileSystem.uploadAsync(`${API_URL}/voice_command`, audioUri, {
-        httpMethod: 'POST',
-        uploadType: 1, // FileSystemUploadType.MULTIPART enum is 1
-        fieldName: 'audio'
-      });
-      return JSON.parse(uploadResult.body);
-    }
-
-    const form = new FormData();
-    form.append('audio', audioUri, audioUri.name);
-
-    const response = await fetch(`${API_URL}/voice_command`, {
-      method: 'POST',
-      body: form,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Serveur ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("API Error (voice_command):", error);
-    throw error;
   }
 };

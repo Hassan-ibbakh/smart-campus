@@ -72,7 +72,7 @@ export default function SettingsScreen() {
           <View style={styles.glassCard}>
             <SettingItem 
               label="Push Alerts" 
-              description="Campus emergency & status updates" 
+              description="Mall emergency & status updates" 
               value={notifications} 
               onToggle={setNotifications} 
             />
@@ -80,7 +80,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.infoBox}>
-          <Text style={styles.infoText}>Smart Campus UMP — Version 2.1.0</Text>
+          <Text style={styles.infoText}>Smart Mall — Version 2.1.0</Text>
           <Text style={styles.infoSub}>Engineering Grade Infrastructure</Text>
         </View>
       </ScrollView>

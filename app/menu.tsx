@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { fetchBuildings, fetchHistory, fetchEmergency } from '../services/api';
+import { fetchEmergency, fetchStores, fetchPromotions } from '../services/api';
 import BottomNav from '../components/BottomNav';
 
 export default function MenuScreen() {
   const router = useRouter();
-  const [buildings, setBuildings] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [emergency, setEmergency] = useState(null);
+  const [stores, setStores] = useState([]);
+  const [promos, setPromos] = useState([]);
+  const [emergency, setEmergency] = useState<any>(null);
 
   useEffect(() => {
-    fetchBuildings().then(setBuildings);
-    fetchHistory().then(setHistory);
+    fetchStores().then(setStores);
+    fetchPromotions().then(setPromos);
     fetchEmergency().then(setEmergency);
   }, []);
 
@@ -28,63 +28,62 @@ export default function MenuScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backText}>← BACK</Text>
+          <Text style={styles.backText}>← RETOUR</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>COMMAND CENTER</Text>
+        <Text style={styles.headerTitle}>CENTRE DE CONTRÔLE</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <MenuCard title="CAMPUS INFRASTRUCTURE">
+        <MenuCard title="ANNUAIRE DU MALL">
           <View style={styles.buildingGrid}>
-            {buildings.map((b: any) => (
-              <View key={b.id} style={[styles.buildingItem, { borderColor: `${b.color}40` }]}>
-                <View style={[styles.typeBadge, { backgroundColor: b.color }]} />
-                <Text style={styles.buildingName}>{b.name}</Text>
-                <Text style={styles.buildingNameAr}>{b.nameAr}</Text>
-                <Text style={styles.buildingInfo}>{b.floors} FLOORS • {b.type.toUpperCase()}</Text>
+            {stores.map((s: any) => (
+              <View key={s.id} style={[styles.buildingItem, { borderColor: '#2563EB40' }]}>
+                <View style={[styles.typeBadge, { backgroundColor: '#2563EB' }]} />
+                <Text style={styles.buildingName}>{s.name}</Text>
+                <Text style={styles.buildingInfo}>{s.category.toUpperCase()} • {s.status.toUpperCase()}</Text>
+                <Text style={styles.buildingInfo}>Niveau {s.floor}</Text>
               </View>
             ))}
           </View>
           
-          {/* Figma Inspiration: Quick Stats Bar */}
           <View style={styles.statsBar}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>12</Text>
-              <Text style={styles.statLabel}>BUILDINGS</Text>
+              <Text style={styles.statValue}>{stores.length}</Text>
+              <Text style={styles.statLabel}>BOUTIQUES</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>48</Text>
-              <Text style={styles.statLabel}>DEPTS</Text>
+              <Text style={styles.statValue}>3</Text>
+              <Text style={styles.statLabel}>NIVEAUX</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>200+</Text>
-              <Text style={styles.statLabel}>ROOMS</Text>
+              <Text style={styles.statValue}>1500+</Text>
+              <Text style={styles.statLabel}>PARKING</Text>
             </View>
           </View>
         </MenuCard>
 
-        <MenuCard title="RECENT DEPLOYMENTS (HISTORY)">
-          {history.map((h: any) => (
-            <View key={h.id} style={styles.historyItem}>
+        <MenuCard title="PROMOTIONS & VENTES FLASH">
+          {promos.map((p: any) => (
+            <View key={p.id} style={styles.historyItem}>
               <View>
-                <Text style={styles.historyDest}>{h.destination}</Text>
-                <Text style={styles.historyDate}>{h.date} • {h.time}</Text>
+                <Text style={styles.historyDest}>{p.store} : {p.title}</Text>
+                <Text style={styles.historyDate}>Valide jusqu'au {p.valid_until}</Text>
               </View>
-              <Text style={styles.historyArrow}>→</Text>
+              <Text style={styles.historyArrow}>🏷️</Text>
             </View>
           ))}
         </MenuCard>
 
         {emergency && (
-          <MenuCard title="EMERGENCY PROTOCOLS" style={styles.emergencyCard}>
+          <MenuCard title="PROTOCOLES D'URGENCE" style={styles.emergencyCard}>
             <View style={styles.emergencyRow}>
-              <Text style={styles.emergencyLabel}>Security</Text>
+              <Text style={styles.emergencyLabel}>Sécurité Mall</Text>
               <Text style={styles.emergencyValue}>{emergency.security}</Text>
             </View>
             <View style={styles.emergencyRow}>
-              <Text style={styles.emergencyLabel}>Medical</Text>
+              <Text style={styles.emergencyLabel}>Premiers Secours</Text>
               <Text style={styles.emergencyValue}>{emergency.medical}</Text>
             </View>
           </MenuCard>

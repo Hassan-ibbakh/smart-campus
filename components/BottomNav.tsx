@@ -22,11 +22,11 @@ export default function BottomNav() {
   return (
     <View style={styles.container}>
       <View style={styles.navBar}>
-        <NavItem label="HOME"   path="/"        />
-        <NavItem label="MAP"    path="/navigate" />
-        <NavItem label="ASSIST" path="/ask"      />
-        <NavItem label="MODS"   path="/menu"     />
-        <NavItem label="CONF"   path="/settings" />
+        <NavItem label="ACCUEIL"   path="/"        />
+        <NavItem label="CARTE"    path="/navigate" />
+        <NavItem label="ASSISTANT" path="/ask"      />
+        <NavItem label="MENU"   path="/menu"     />
+        <NavItem label="RÉGLAGES"   path="/settings" />
       </View>
     </View>
   );

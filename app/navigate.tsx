@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import VoiceButton from '../components/VoiceButton';
-import CampusMap from '../components/CampusMap';
+import MallMap from '../components/MallMap';
 import AudioGuide from '../components/AudioGuide';
 import { useNavigation } from '../hooks/useNavigation';
 import { useSpeech } from '../hooks/useSpeech';
 import { usePDR } from '../hooks/usePDR';
+import { updatePosition } from '../services/api';
 
 // ─── Telemetry ────────────────────────────────────────────────────────────────
 const MetricBar = ({ label, value, unit, progress, color }: any) => (
@@ -45,9 +46,9 @@ const TelemetryBar = ({ isNavigating }: { isNavigating: boolean }) => {
 
   return (
     <View style={styles.telemetryContainer}>
-      <MetricBar label="WI-FI PRECISION" value={accuracy} unit="m"  progress={85} color="#00E676" />
-      <MetricBar label="RAG LATENCY"     value={latency}  unit="ms" progress={92} color="#5BC0BE" />
-      <MetricBar label="SAT LOCK"        value="4"        unit="/5" progress={80} color="#00E676" />
+      <MetricBar label="PRÉCISION WI-FI" value={accuracy} unit="m"  progress={85} color="#00E676" />
+      <MetricBar label="LATENCE IA"     value={latency}  unit="ms" progress={92} color="#5BC0BE" />
+      <MetricBar label="SIGNAL GPS"        value="4"        unit="/5" progress={80} color="#00E676" />
     </View>
   );
 };
@@ -103,6 +104,10 @@ export default function NavigateScreen() {
   // ── ③ Lire l'instruction courante à chaque changement d'étape ─────────────
   useEffect(() => {
     if (!currentStep) return;
+    
+    // Envoyer la position au backend pour le dashboard
+    updatePosition('user_123', currentStep.id);
+
     const text = enhancedAccessibility
       ? `${currentStep.label}. ${currentStep.accessibilityHint}`
       : currentStep.accessibilityHint;
@@ -154,9 +159,9 @@ export default function NavigateScreen() {
       <TelemetryBar isNavigating={steps.length > 0 && !isArrived} />
 
       <View style={styles.mapZone}>
-        <CampusMap steps={steps} currentStepIndex={currentIndex} />
+        <MallMap steps={steps} currentStepIndex={currentIndex} />
 
-        <InfoCard label="NIVEAU ACTUEL"  value={`Étage ${currentStep?.floor ?? 0}`} align="left"  />
+        <InfoCard label="NIVEAU DU MALL"  value={`Niveau ${currentStep?.floor ?? 0}`} align="left"  />
         <InfoCard label="DISTANCE RESTANTE" value={`${distanceRestante} m`}          align="right" />
 
         {/* Badge destination (affiché uniquement si on vient de l'assistant) */}
@@ -176,7 +181,7 @@ export default function NavigateScreen() {
           <View style={styles.instructionContainer}>
             <Text style={styles.instructionLabel}>INSTRUCTION ACTUELLE</Text>
             <Text style={styles.instructionText}>
-              {currentStep?.label ?? 'Prêt pour la navigation'}
+              {currentStep?.label ?? 'Prêt pour le shopping'}
             </Text>
             {isArrived && (
               <Text style={styles.arrivedText}>✅ Vous êtes arrivé !</Text>

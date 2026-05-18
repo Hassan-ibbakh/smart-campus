@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Smart Campus",
-    "slug": "smart-campus",
+    "name": "Smart Mall",
+    "slug": "smart-mall",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
       }
     },
     "android": {
-      "package": "com.hackmia.smartcampus",
+      "package": "com.hackmia.smartmall",
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ]

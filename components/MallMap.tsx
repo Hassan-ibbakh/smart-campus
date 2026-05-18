@@ -4,16 +4,16 @@ import Svg, { Circle, Line, Text as SvgText, Defs, Pattern, Path, Rect } from 'r
 import Animated, { useSharedValue, useAnimatedProps, withRepeat, withTiming, Easing, withSpring } from 'react-native-reanimated';
 import { NavigationStep } from '../services/api';
 
-import graphData from '../data/campus_graph.json';
+import graphData from '../data/mall_graph.json';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-interface CampusMapProps {
+interface MallMapProps {
   steps: NavigationStep[];
   currentStepIndex: number;
 }
 
-export default function CampusMap({ steps, currentStepIndex }: CampusMapProps) {
+export default function MallMap({ steps, currentStepIndex }: MallMapProps) {
   const markerX = useSharedValue(50);
   const markerY = useSharedValue(300);
   const markerScale = useSharedValue(1);

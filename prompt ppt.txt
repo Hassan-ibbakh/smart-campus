@@ -1,0 +1,47 @@
+Here is a structured, comprehensive overview based on the **"Smart Mapping.pdf"** document. You can copy and paste this directly into a PowerPoint AI agent to generate your slide deck.
+
+---
+
+### **Prompt / Brief for PowerPoint AI Agent:**
+
+**Presentation Title:** Smart Indoor Navigation & Retail Analytics System
+**Project Name:** Wrinitriq (Smart Mapping)
+**Industry:** Smart Retail / PropTech / Smart Buildings
+
+**1. Elevator Pitch (Overview)**
+Our project is a dual-purpose AI-powered platform designed for large, complex buildings like shopping malls. It provides seamless, optimal indoor navigation for visitors while simultaneously generating advanced behavioral data and "Spatial Intelligence" for mall managers.
+
+**2. The Problem**
+
+* **For Visitors (B2C):** GPS doesn't work indoors. Visitors waste time getting lost, struggling to find specific stores, products, or amenities in massive, multi-level malls, leading to frustration and a poor shopping experience.
+* **For Mall Managers (B2B):** A massive "blind spot." Managers lack precise data on real customer foot traffic. They don't know which zones are highly visited, which are ignored, or how people navigate between stores, making it impossible to optimize layouts or measure physical marketing ROI.
+
+**3. The Target Audience (Personas)**
+
+* **B2C (The Visitor - "Amina"):** Shoppers, families, or people with specific mobility needs (e.g., strollers/wheelchairs) who want to find the fastest, most optimized route to multiple stores.
+* **B2B (The Manager - "Karim"):** Mall directors and retail brands who need actionable data (heatmaps, traffic flows) to optimize commercial spaces and increase sales.
+
+**4. The Solution (Key Features)**
+
+* **For Visitors:** An interactive digital map with step-by-step guidance. *Standout feature:* Multi-destination routing (the AI calculates the most efficient path if a user wants to visit 3 different stores).
+* **For Managers:** A comprehensive analytics dashboard. Tracks visitor movements anonymously to generate heatmaps, dwell times, and identify hot/cold commercial zones.
+
+**5. Competitive Advantage**
+Most existing solutions *only* focus on navigation (digital maps) OR *only* focus on analytics (expensive camera systems). Our system uniquely combines **intelligent indoor navigation** with **retail analytics**. By solving the visitor's problem (getting lost), we automatically generate the data the manager desperately needs.
+
+**6. Business Model**
+
+* **B2B SaaS (Software as a Service):** Tiered subscriptions for Mall Management.
+* *Starter:* Basic maps and navigation.
+* *Business:* Advanced behavioral analytics, heatmaps, and marketing recommendations.
+* *Custom:* Tailored deployments for massive institutions.
+
+
+* **B2C Freemium:** Free for end-users to guarantee massive adoption, which in turn generates the valuable data sold to the B2B clients.
+
+**7. Market & Scalability**
+
+* **Initial Target (SOM):** National shopping malls and large retail brands.
+* **Expansion (TAM):** Airports, mega-hospitals, university campuses, and public administration buildings globally.
+
+*** **Tip for the AI Agent:** Instruct the AI to use a modern, clean, "consulting-style" design with two main pillars running throughout the deck: **User Experience (Navigation)** vs. **Business Intelligence (Data Analytics)**.

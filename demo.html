@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wrinitriq - Smart Indoor Navigation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- VARIABLES & BASE DESIGN --- */
+        :root {
+            --bg-dark: #09090b;
+            --bg-panel: #18181b;
+            --bg-glass: rgba(24, 24, 27, 0.7);
+            --primary: #10b981;
+            /* Emerald / Wrinitriq Theme */
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        /* --- MOBILE CONTAINER --- */
+        #app-container {
+            width: 375px;
+            height: 812px;
+            background-color: var(--bg-dark);
+            border-radius: 45px;
+            box-shadow: 0 0 0 14px #111, 0 0 0 15px #333, 0 30px 60px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Notch */
+        #app-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background-color: #111;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* Home Indicator */
+        #app-container::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* --- VIEWS (OVERLAPPING ANIMATION) --- */
+        .view {
+            position: absolute;
+            top: 100px; /* Space for header */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 100px);
+            background-color: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 80px; /* Space for nav */
+            transform: translateY(50px) scale(0.95);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 1;
+        }
+
+        .view.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 2;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.3); /* Adds depth over inactive views */
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        /* --- GLASSMORPHISM COMPONENTS --- */
+        .glass-panel {
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            position: relative;
+            padding: 40px 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .slogan {
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* --- HOME VIEW --- */
+        #view-home {
+            padding: 0 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            margin: 10px 0 25px;
+            border-radius: 15px;
+            color: var(--text-muted);
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .cat-card {
+            padding: 20px;
+            border-radius: 16px;
+            background: var(--bg-panel);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        .cat-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+        }
+
+        .cat-icon {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .cat-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .promo-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            padding: 30px 20px;
+            background: linear-gradient(45deg, #1e293b, #0f172a);
+            border: 1px solid var(--border-glass);
+            margin-bottom: 25px;
+        }
+
+        .promo-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: var(--primary);
+            filter: blur(80px);
+            opacity: 0.2;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* --- ASSIST VIEW --- */
+        #view-assist {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 16px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: var(--primary);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-ai {
+            align-self: flex-start;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glass);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-ai ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .chat-input-area {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: var(--bg-dark);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glass);
+            border-radius: 25px;
+            padding: 15px 20px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .mic-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* --- MAPS VIEW --- */
+        #view-maps {
+            position: relative;
+            padding: 0;
+            background: #0f172a;
+            overflow: hidden;
+        }
+
+        .map-layer {
+            position: absolute;
+            width: 800px;
+            height: 1200px;
+            transform-origin: 0 0;
+            transition: transform 0.1s linear;
+        }
+
+        /* Map Elements Styling */
+        .map-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+
+        .corridor {
+            position: absolute;
+            background: #1e293b;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .poi {
+            position: absolute;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .poi i {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        /* Store Types */
+        .fashion {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .food {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .beauty {
+            background: rgba(236, 72, 153, 0.15);
+            border-color: rgba(236, 72, 153, 0.3);
+        }
+
+        .service {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .emergency {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Specific Targets for Path */
+        .target-zara {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+            color: #fff;
+        }
+
+        .target-adidas {
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            color: #fff;
+        }
+
+        .target-sephora {
+            border-color: #ec4899;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.4);
+            color: #fff;
+        }
+
+        /* Path & User Dot */
+        #svg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .path-line {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 4;
+            stroke-dasharray: 10;
+            stroke-linecap: round;
+            opacity: 0.6;
+        }
+
+        .user-dot {
+            fill: #fff;
+            filter: drop-shadow(0 0 8px #10b981);
+        }
+
+        .user-pulse {
+            fill: var(--primary);
+            opacity: 0.4;
+            animation: pulseDot 1.5s infinite;
+        }
+
+        @keyframes pulseDot {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* Nav Instructions Overlay */
+        .nav-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+            transform: translateY(-100px);
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-overlay.active {
+            transform: translateY(0);
+        }
+
+        .nav-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+        }
+
+        .nav-text h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .nav-text p {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Smart Ad Toast */
+        .ad-toast {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            background: rgba(245, 158, 11, 0.95);
+            padding: 15px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 30;
+            transform: scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .ad-toast.active {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .ad-icon {
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f59e0b;
+            font-size: 20px;
+        }
+
+        .ad-content h4 {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .ad-content p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 15px 25px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-glass);
+            z-index: 50;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active i {
+            transform: translateY(-3px);
+        }
+        /* --- LIGHT MODE --- */
+        body.light-mode {
+            background-color: #e2e8f0;
+            --bg-dark: #f8fafc;
+            --bg-panel: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-glass: rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-mode #view-maps {
+            background: #e2e8f0;
+        }
+
+        body.light-mode .map-bg {
+            background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        body.light-mode .corridor {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .poi {
+            color: #334155;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .bottom-nav {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        body.light-mode .chat-input {
+            color: #0f172a;
+        }
+
+        body.light-mode .promo-card {
+            background: linear-gradient(45deg, #f1f5f9, #ffffff);
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .promo-card p, body.light-mode .promo-card h2 {
+            color: #0f172a !important;
+        }
+
+        body.light-mode #app-container::before {
+            background-color: #f8fafc;
+        }
+        
+        body.light-mode #app-container {
+            box-shadow: 0 0 0 14px #e2e8f0, 0 0 0 15px #cbd5e1, 0 30px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        body.light-mode #app-container::after {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        body.light-mode .msg-ai {
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app-container">
+
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-location-arrow" style="color: #fff; font-size: 14px;"></i>
+                </div>
+                <div>
+                    <div class="logo-text">Wrinitriq</div>
+                    <div class="slogan">Smart Indoor Navigation</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div id="theme-toggle" onclick="toggleTheme()"
+                    style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-panel); border: 1px solid var(--border-glass); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s;">
+                    <i class="fa-solid fa-sun" id="theme-icon"></i>
+                </div>
+                <div
+                    style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-panel); border: 1px solid var(--border-glass); display: flex; justify-content: center; align-items: center;">
+                    <i class="fa-regular fa-bell"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-home" class="view active">
+            <div class="search-bar glass-panel">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span style="font-size: 14px;">Rechercher un magasin, produit...</span>
+            </div>
+
+            <h3 style="font-size: 16px; margin-bottom: 15px; font-weight: 600;">Catégories</h3>
+            <div class="categories">
+                <div class="cat-card">
+                    <i class="fa-solid fa-shirt cat-icon"></i>
+                    <span class="cat-title">Fashion</span>
+                </div>
+                <div class="cat-card">
+                    <i class="fa-solid fa-burger cat-icon" style="color: #f59e0b;"></i>
+                    <span class="cat-title">Food & Resto</span>
+                </div>
+                <div class="cat-card">
+                    <i class="fa-solid fa-laptop cat-icon" style="color: #3b82f6;"></i>
+                    <span class="cat-title">Electronics</span>
+                </div>
+                <div class="cat-card">
+                    <i class="fa-solid fa-spa cat-icon" style="color: #ec4899;"></i>
+                    <span class="cat-title">Beauty</span>
+                </div>
+            </div>
+
+            <div class="promo-card">
+                <h2 style="font-size: 22px; margin-bottom: 5px; position: relative; z-index: 1;">Morocco Mall</h2>
+                <p
+                    style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px; position: relative; z-index: 1;">
+                    Digital Twin Dashboard Simulée</p>
+                <div class="stats-container position: relative; z-index: 1;">
+                    <div class="stat-item">
+                        <div class="stat-val">14.2k</div>
+                        <div class="stat-label">Visiteurs Live</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val">350+</div>
+                        <div class="stat-label">Boutiques</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val">3</div>
+                        <div class="stat-label">Niveaux</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-assist" class="view">
+            <div class="chat-container" id="chat-history">
+                <div class="message msg-ai">
+                    👋 Bonjour ! Je suis l'assistant IA de Wrinitriq. Que cherchez-vous dans le mall aujourd'hui ?
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Ex: Acheter un costume, parfum..."
+                    readonly
+                    value="Je veux acheter des chaussures Adidas, un parfum chez Sephora et un costume chez Zara.">
+                <div class="mic-btn" id="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-maps" class="view">
+
+            <div class="nav-overlay glass-panel" id="nav-overlay">
+                <div class="nav-icon" id="nav-icon"><i class="fa-solid fa-arrow-up"></i></div>
+                <div class="nav-text">
+                    <h3 id="nav-instruction">Calcul en cours...</h3>
+                    <p id="nav-distance">-- m restants</p>
+                </div>
+            </div>
+
+            <div class="ad-toast" id="kfc-ad">
+                <div class="ad-icon"><i class="fa-solid fa-drumstick-bite"></i></div>
+                <div class="ad-content">
+                    <h4>KFC à proximité !</h4>
+                    <p>-10% sur tout le menu aujourd'hui 🍔</p>
+                </div>
+            </div>
+
+            <div class="map-layer" id="map-layer">
+                <div class="map-bg"></div>
+
+                <div class="corridor" style="left: 300px; top: 100px; width: 80px; height: 900px;"></div>
+                <div class="corridor" style="left: 100px; top: 300px; width: 600px; height: 80px;"></div>
+                <div class="corridor" style="left: 100px; top: 700px; width: 600px; height: 80px;"></div>
+
+                <div class="poi fashion target-zara" style="left: 120px; top: 150px; width: 160px; height: 130px;">
+                    <i class="fa-solid fa-shirt"></i> Zara (Niv. 1)
+                </div>
+                <div class="poi fashion target-adidas" style="left: 400px; top: 150px; width: 140px; height: 130px;">
+                    <i class="fa-solid fa-shoe-prints"></i> Adidas (Niv. 1)
+                </div>
+
+                <div class="poi beauty target-sephora" style="left: 560px; top: 400px; width: 120px; height: 280px;">
+                    <i class="fa-solid fa-spa"></i> Sephora (Niv. 2)
+                </div>
+
+                <div class="poi food" style="left: 120px; top: 400px; width: 160px; height: 140px;">
+                    <i class="fa-solid fa-utensils"></i> Food Court
+                </div>
+                <div class="poi food" id="poi-kfc" style="left: 400px; top: 400px; width: 140px; height: 100px;">
+                    <i class="fa-solid fa-drumstick-bite"></i> KFC
+                </div>
+                <div class="poi food" style="left: 400px; top: 520px; width: 140px; height: 80px;">
+                    <i class="fa-solid fa-mug-hot"></i> Starbucks
+                </div>
+
+                <div class="poi emergency" style="left: 30px; top: 315px; width: 50px; height: 50px;">
+                    <i class="fa-solid fa-door-open"></i> Exit
+                </div>
+                <div class="poi emergency" style="left: 30px; top: 715px; width: 50px; height: 50px;">
+                    <i class="fa-solid fa-door-open"></i> Exit
+                </div>
+                <div class="poi service" style="left: 315px; top: 40px; width: 50px; height: 50px;">
+                    <i class="fa-solid fa-elevator"></i> Ascenseur
+                </div>
+                <div class="poi service" style="left: 315px; top: 550px; width: 50px; height: 50px;">
+                    <i class="fa-solid fa-restroom"></i> W.C.
+                </div>
+                <div class="poi service" style="left: 315px; top: 820px; width: 50px; height: 50px;">
+                    <i class="fa-solid fa-info-circle"></i> Accueil
+                </div>
+                <div class="poi service" style="left: 120px; top: 820px; width: 160px; height: 100px;">
+                    <i class="fa-solid fa-car"></i> Parking P1
+                </div>
+
+                <div class="poi service"
+                    style="left: 315px; top: 1020px; width: 50px; height: 50px; background: rgba(16,185,129,0.3); border-color: var(--primary);">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrée Principale
+                </div>
+
+                <svg id="svg-overlay" xmlns="http://www.w3.org/2000/svg">
+                    <polyline id="route-path" class="path-line" points="" />
+
+                    <g id="user-avatar" transform="translate(340, 1045)">
+                        <circle class="user-pulse" cx="0" cy="0" r="20" />
+                        <circle class="user-dot" cx="0" cy="0" r="8" />
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchView('home', this)">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="switchView('maps', this)">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>Maps</span>
+            </div>
+            <div class="nav-item" onclick="switchView('assist', this)">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Assist</span>
+            </div>
+            <div class="nav-item">
+                <i class="fa-solid fa-bars"></i>
+                <span>More</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- SCALE APP TO FIT SCREEN ---
+        function scaleApp() {
+            const container = document.getElementById('app-container');
+            const targetWidth = 375;
+            const targetHeight = 812;
+            const padding = 60; // Space for bezels/shadows
+
+            const scaleX = window.innerWidth / (targetWidth + padding);
+            const scaleY = window.innerHeight / (targetHeight + padding);
+            
+            let scale = Math.min(scaleX, scaleY);
+            if (scale > 1) scale = 1;
+
+            container.style.transform = `scale(${scale})`;
+            container.style.transformOrigin = 'center center';
+        }
+        window.addEventListener('resize', scaleApp);
+        scaleApp(); // init on load
+
+        // --- THEME TOGGLE LOGIC ---
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            if (document.body.classList.contains('light-mode')) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        // --- NAVIGATION LOGIC ---
+        function switchView(viewName, element) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // --- ASSIST (RAG SIMULATION) LOGIC ---
+        const chatHistory = document.getElementById('chat-history');
+        const sendBtn = document.getElementById('send-btn');
+        const chatInput = document.getElementById('chat-input');
+        let chatTriggered = false;
+
+        sendBtn.addEventListener('click', () => {
+            if (chatTriggered) return;
+            chatTriggered = true;
+
+            // Add user msg
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message msg-user';
+            userMsg.innerText = chatInput.value;
+            chatHistory.appendChild(userMsg);
+
+            chatInput.value = "";
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            // Simulate AI Thinking delay
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message msg-ai';
+                aiMsg.innerHTML = `
+                L'itinéraire optimal a été calculé (A* Algorithm) :
+                <ul>
+                    <li><strong>Zara</strong> (Costume) - Niveau 1</li>
+                    <li><strong>Adidas</strong> (Chaussures) - Niveau 1</li>
+                    <li><strong>Sephora</strong> (Parfum) - Niveau 2</li>
+                </ul>
+                📍 Distance totale : 420m <br>
+                ⏱️ Temps estimé : 6 min
+                <div class="btn-action" onclick="startNavigation()">Voir le trajet 🚀</div>
+            `;
+                chatHistory.appendChild(aiMsg);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }, 1500);
+        });
+
+        // --- MAPS NAVIGATION & ANIMATION LOGIC ---
+        const mapLayer = document.getElementById('map-layer');
+        const routePath = document.getElementById('route-path');
+        const userAvatar = document.getElementById('user-avatar');
+        const navOverlay = document.getElementById('nav-overlay');
+        const navInstruction = document.getElementById('nav-instruction');
+        const navDistance = document.getElementById('nav-distance');
+        const navIcon = document.getElementById('nav-icon');
+        const kfcAd = document.getElementById('kfc-ad');
+
+        // Route points [x, y, instruction_text, instruction_icon]
+        const pathNodes = [
+            [340, 1045, "Avancez dans le couloir principal", "fa-arrow-up"], // Start (Entrée)
+            [340, 740, "Continuez tout droit", "fa-arrow-up"],
+            [340, 340, "Tournez à gauche vers Zara", "fa-arrow-turn-down fa-rotate-90"], // Inter 1
+            [200, 340, "Vous êtes arrivé chez Zara", "fa-check"], // Zara
+            [340, 340, "Revenez au couloir principal", "fa-arrow-turn-down fa-rotate-270"],
+            [340, 215, "Tournez à droite vers Adidas", "fa-arrow-turn-up fa-rotate-90"], // Inter Adidas
+            [470, 215, "Vous êtes arrivé chez Adidas", "fa-check"], // Adidas
+            [340, 215, "Revenez au couloir principal", "fa-arrow-turn-up fa-rotate-270"],
+            [340, 100, "Prenez l'ascenseur pour le Niveau 2", "fa-elevator"], // Elevators
+            [620, 100, "Continuez dans le couloir N2", "fa-arrow-right"],
+            [620, 380, "Destination finale : Sephora !", "fa-flag-checkered"] // Sephora
+        ];
+
+        let currentSegment = 0;
+        let progress = 0; // 0 to 1 along current segment
+        const speed = 0.005; // Animation speed
+        let isNavigating = false;
+        let synth = window.speechSynthesis;
+
+        // Draw static path line
+        const pointsString = pathNodes.map(p => `${p[0]},${p[1]}`).join(" ");
+        routePath.setAttribute("points", pointsString);
+
+        function startNavigation() {
+            // Switch to maps view
+            document.querySelectorAll('.nav-item')[1].click();
+
+            setTimeout(() => {
+                navOverlay.classList.add('active');
+                isNavigating = true;
+                currentSegment = 0;
+                progress = 0;
+                updateInstruction();
+                requestAnimationFrame(animatePath);
+            }, 500);
+        }
+
+        function speak(text) {
+            if (synth) {
+                synth.cancel(); // Stop current speaking
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'fr-FR';
+                utterance.rate = 1.1;
+                synth.speak(utterance);
+            }
+        }
+
+        function updateInstruction() {
+            const node = pathNodes[currentSegment];
+            navInstruction.innerText = node[2];
+            navIcon.innerHTML = `<i class="fa-solid ${node[3]}"></i>`;
+            speak(node[2]);
+        }
+
+        function animatePath() {
+            if (!isNavigating || currentSegment >= pathNodes.length - 1) return;
+
+            const startPt = pathNodes[currentSegment];
+            const endPt = pathNodes[currentSegment + 1];
+
+            // Interpolate position
+            const currentX = startPt[0] + (endPt[0] - startPt[0]) * progress;
+            const currentY = startPt[1] + (endPt[1] - startPt[1]) * progress;
+
+            // Move avatar
+            userAvatar.setAttribute("transform", `translate(${currentX}, ${currentY})`);
+
+            // Camera follow logic (Center user on screen roughly)
+            const screenW = window.innerWidth > 375 ? 375 : window.innerWidth;
+            const screenH = 812;
+            let camX = -(currentX - screenW / 2);
+            let camY = -(currentY - screenH / 2) - 100; // offset for UI
+
+            // Clamp camera
+            camX = Math.max(-425, Math.min(0, camX));
+            camY = Math.max(-400, Math.min(0, camY));
+
+            mapLayer.style.transform = `translate(${camX}px, ${camY}px)`;
+
+            // Update fake distance
+            const totalSegs = pathNodes.length - 1;
+            const remaining = Math.floor(420 * (1 - ((currentSegment + progress) / totalSegs)));
+            navDistance.innerText = `${Math.max(0, remaining)} m restants`;
+
+            // Smart Ad / Geofencing Check (Trigger near KFC)
+            // KFC is roughly at Y: 400. Segment 1 is from Y:740 to Y:340.
+            if (currentSegment === 1 && currentY < 500 && currentY > 380) {
+                kfcAd.classList.add('active');
+                if (!kfcAd.hasPlayedSound) {
+                    // simulate short ping sound / voice
+                    kfcAd.hasPlayedSound = true;
+                }
+            } else {
+                kfcAd.classList.remove('active');
+            }
+
+            progress += speed;
+
+            if (progress >= 1) {
+                progress = 0;
+                currentSegment++;
+                if (currentSegment < pathNodes.length - 1) {
+                    updateInstruction();
+                } else {
+                    // Arrived
+                    navInstruction.innerText = "Navigation terminée !";
+                    navIcon.innerHTML = `<i class="fa-solid fa-flag-checkered"></i>`;
+                    navDistance.innerText = "0 m";
+                    speak("Vous êtes arrivé à votre destination finale.");
+                    isNavigating = false;
+                }
+            }
+
+            if (isNavigating) {
+                requestAnimationFrame(animatePath);
+            }
+        }
+
+    </script>
+</body>
+
+</html>

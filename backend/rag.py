@@ -1,35 +1,28 @@
-def query_rag(query: str):
+from typing import Optional
+from service_rag import search_services
+
+def query_rag(query: str, top_k: int = 1) -> Optional[dict]:
     """
-    Simule un système RAG. 
-    En production, ceci utiliserait LangChain/LlamaIndex et une vraie base vectorielle.
+    Système RAG unifié pour le Mall.
+    Utilise la recherche vectorielle (ChromaDB) pour trouver les services pertinents.
     """
-    query_lower = query.lower()
-    
-    if "scolarité" in query_lower or "inscription" in query_lower or "diplôme" in query_lower:
-        return {
-            "office": "Scolarité",
-            "node_id": "B104",
-            "floor": 1,
-            "description": "Le service de scolarité gère les inscriptions et les diplômes.",
-            "rag_excerpt": "[Extrait du livret d'accueil.pdf] Le bureau B104 (Scolarité) est ouvert de 9h à 16h au premier étage."
-        }
-    
-    if "direction" in query_lower or "doyen" in query_lower:
-        return {
-            "office": "Direction",
-            "node_id": "B105",
-            "floor": 1,
-            "description": "Le bureau du doyen et de la direction générale.",
-            "rag_excerpt": "[Extrait organigramme.pdf] La direction est située au B105."
-        }
+    try:
+        results = search_services(query, top_k=top_k)
         
-    if "rh" in query_lower or "ressources humaines" in query_lower:
+        if not results or not results.get("metadatas") or not results["metadatas"][0]:
+            return None
+            
+        best = results["metadatas"][0][0]
+        
         return {
-            "office": "Ressources Humaines",
-            "node_id": "B106",
-            "floor": 1,
-            "description": "Service du personnel et des ressources humaines.",
-            "rag_excerpt": "[Extrait annuaire.pdf] RH : Bureau B106."
+            "name": best['name'],
+            "node_id": best.get("node_id"),
+            "floor": best.get("floor"),
+            "description": best['description'],
+            "horaires": best.get("horaires"),
+            "category": best.get("category"),
+            "rag_excerpt": f"[Base Vectorielle] {best['name']} : {best['description']}"
         }
-    
-    return None
+    except Exception as e:
+        print(f"[RAG] Erreur lors de la requête : {e}")
+        return None

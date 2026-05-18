@@ -5,7 +5,10 @@
     "name": "Accueil & Information",
     "description": "Point d'information central du mall : plans, renseignements sur les boutiques, objets trouvés, assistance aux visiteurs.",
     "keywords": ["accueil", "information", "plan", "aide", "renseignement", "objets trouvés"],
-    "horaires": "Lun-Dim 10h-22h"
+    "horaires": "Lun-Dim 10h-22h",
+    "category": "Services",
+    "floor": 0,
+    "status": "Ouvert"
   },
   {
     "id": "supermarche",
@@ -13,7 +16,10 @@
     "name": "Supermarché Carrefour",
     "description": "Grande surface alimentaire : épicerie, fruits et légumes, boucherie, boulangerie, produits ménagers.",
     "keywords": ["supermarché", "courses", "alimentation", "épicerie", "nourriture", "carrefour"],
-    "horaires": "Lun-Dim 9h-22h"
+    "horaires": "Lun-Dim 9h-22h",
+    "category": "Supermarché",
+    "floor": 0,
+    "status": "Ouvert"
   },
   {
     "id": "food_court",
@@ -21,7 +27,10 @@
     "name": "Food Court",
     "description": "Espace restauration avec plusieurs enseignes : fast food, pizza, sushi, sandwicherie, café.",
     "keywords": ["manger", "restaurant", "déjeuner", "pizza", "burger", "café", "repas", "sushi"],
-    "horaires": "Lun-Dim 11h-22h"
+    "horaires": "Lun-Dim 11h-22h",
+    "category": "Restauration",
+    "floor": 2,
+    "status": "Ouvert"
   },
   {
     "id": "cinema",
@@ -29,7 +38,10 @@
     "name": "Cinéma Megaplex",
     "description": "Complexe cinématographique avec 8 salles, films en VO et VF, séances en 3D et IMAX.",
     "keywords": ["cinéma", "film", "séance", "billet", "3D", "IMAX", "projection"],
-    "horaires": "Lun-Dim 10h-23h"
+    "horaires": "Lun-Dim 10h-23h",
+    "category": "Loisirs",
+    "floor": 2,
+    "status": "Ouvert"
   },
   {
     "id": "zara",
@@ -37,7 +49,10 @@
     "name": "Zara",
     "description": "Boutique de mode homme, femme et enfant. Collections tendance, vêtements, accessoires.",
     "keywords": ["vêtements", "mode", "zara", "habits", "femme", "homme", "enfant", "shopping"],
-    "horaires": "Lun-Dim 10h-22h"
+    "horaires": "Lun-Dim 10h-22h",
+    "category": "Mode",
+    "floor": 1,
+    "status": "Ouvert"
   },
   {
     "id": "pharmacie",
@@ -45,7 +60,10 @@
     "name": "Pharmacie du Mall",
     "description": "Pharmacie complète : médicaments, parapharmacie, cosmétiques, conseils santé.",
     "keywords": ["pharmacie", "médicament", "santé", "cosmétique", "soin", "ordonnance"],
-    "horaires": "Lun-Dim 9h-22h"
+    "horaires": "Lun-Dim 9h-22h",
+    "category": "Santé",
+    "floor": 0,
+    "status": "Ouvert"
   },
   {
     "id": "banque_atm",
@@ -53,7 +71,10 @@
     "name": "Distributeurs ATM",
     "description": "Zone regroupant plusieurs distributeurs automatiques de billets (CIH, Attijariwafa, BMCE).",
     "keywords": ["argent", "distributeur", "ATM", "retrait", "banque", "billets", "cash"],
-    "horaires": "24h/24"
+    "horaires": "24h/24",
+    "category": "Services",
+    "floor": 0,
+    "status": "Ouvert"
   },
   {
     "id": "jeux_enfants",
@@ -61,7 +82,10 @@
     "name": "Espace Kids & Jeux",
     "description": "Zone de jeux pour enfants, manèges, aire de jeux couverte, activités ludiques et éducatives.",
     "keywords": ["enfants", "jeux", "aire de jeux", "manège", "kids", "activités", "famille"],
-    "horaires": "Lun-Dim 10h-21h30"
+    "horaires": "Lun-Dim 10h-21h30",
+    "category": "Loisirs",
+    "floor": 1,
+    "status": "Ouvert"
   },
   {
     "id": "parking",
@@ -69,7 +93,10 @@
     "name": "Parking du Mall",
     "description": "Parking souterrain et extérieur, 1500 places, accessible PMR, paiement automatique à la borne.",
     "keywords": ["parking", "voiture", "stationnement", "place", "payer", "sortie voiture"],
-    "horaires": "Lun-Dim 8h-23h"
+    "horaires": "Lun-Dim 8h-23h",
+    "category": "Services",
+    "floor": -1,
+    "status": "Ouvert"
   },
   {
     "id": "toilettes",
@@ -77,7 +104,10 @@
     "name": "Toilettes & Espace de Prière",
     "description": "Sanitaires publics propres à chaque niveau, espace de prière séparé homme/femme, accessible PMR.",
     "keywords": ["toilettes", "WC", "sanitaires", "prière", "mosquée", "ablutions", "PMR"],
-    "horaires": "Lun-Dim 9h-22h30"
+    "horaires": "Lun-Dim 9h-22h30",
+    "category": "Services",
+    "floor": 0,
+    "status": "Ouvert"
   },
   {
     "id": "bijouterie",
@@ -85,7 +115,10 @@
     "name": "Bijouterie Excellence",
     "description": "Bijoux en or, argent, montres de marque, gravure personnalisée, service cadeau.",
     "keywords": ["bijoux", "or", "montre", "bague", "cadeau", "argent", "bijouterie"],
-    "horaires": "Lun-Dim 10h-21h"
+    "horaires": "Lun-Dim 10h-21h",
+    "category": "Luxe",
+    "floor": 1,
+    "status": "Ouvert"
   },
   {
     "id": "sport",
@@ -93,6 +126,9 @@
     "name": "Décathlon Sport",
     "description": "Articles de sport toutes disciplines : vêtements, chaussures, équipements fitness, outdoor.",
     "keywords": ["sport", "fitness", "chaussures", "vélo", "football", "décathlon", "running"],
-    "horaires": "Lun-Dim 9h-22h"
+    "horaires": "Lun-Dim 9h-22h",
+    "category": "Sport",
+    "floor": 1,
+    "status": "Ouvert"
   }
 ]

@@ -8,8 +8,8 @@ BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
 SERVICES_FILE = os.path.join(BASE_DIR, "data", "services.json")
 CHROMA_DIR    = os.path.join(BASE_DIR, "chroma_services")
 
-# ─── Modèle (meilleur sur le français que distiluse) ─────────────────────────
-MODEL_NAME = "paraphrase-multilingual-mpnet-base-v2"
+# ─── Modèle (Plus léger pour éviter les timeouts en hackathon) ───────────────
+MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
 
 _model      = None
 _collection = None
@@ -45,14 +45,22 @@ def _get_collection() -> chromadb.Collection:
     os.makedirs(CHROMA_DIR, exist_ok=True)
     client = chromadb.PersistentClient(path=CHROMA_DIR)
 
-    # Supprimer l'ancienne collection pour forcer la réindexation avec le nouveau modèle
-    try:
-        client.delete_collection("services")
-        print("[RAG] Ancienne collection supprimée — réindexation en cours.")
-    except Exception:
-        pass
-
+    # On ne supprime plus la collection systématiquement pour gagner du temps
     col = client.get_or_create_collection(name="services")
+
+    # Si la collection est déjà peuplée avec les nouvelles métadonnées, on l'utilise directement
+    if col.count() > 0:
+        # Vérifier si la collection a les nouvelles métadonnées (floor, category)
+        sample = col.get(limit=1)
+        if sample and sample.get('metadatas') and sample['metadatas'][0].get('category'):
+            print(f"[RAG] Utilisation de la collection existante ({col.count()} services).")
+            _collection = col
+            return col
+        else:
+            # Ancienne collection sans les nouvelles métadonnées → réindexation
+            print("[RAG] Métadonnées obsolètes détectées — réindexation...")
+            client.delete_collection("services")
+            col = client.create_collection(name="services")
 
     if not os.path.exists(SERVICES_FILE):
         raise FileNotFoundError(
@@ -78,6 +86,9 @@ def _get_collection() -> chromadb.Collection:
                 "name":        s["name"],
                 "horaires":    s.get("horaires", ""),
                 "description": s["description"],
+                "category":    s.get("category", ""),
+                "floor":       str(s.get("floor", 0)),
+                "status":      s.get("status", "Ouvert"),
             }],
         )
 

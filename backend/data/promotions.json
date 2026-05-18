@@ -1,0 +1,6 @@
+[
+  {"id": 1, "store": "Zara", "title": "Soldes été -30%", "valid_until": "2026-06-30"},
+  {"id": 2, "store": "Carrefour", "title": "Fruits & légumes offre", "valid_until": "2026-05-20"},
+  {"id": 3, "store": "Cinéma Megaplex", "title": "Mardi -50% sur billets", "valid_until": "2026-12-31"},
+  {"id": 4, "store": "Décathlon", "title": "Kit running à 299 MAD", "valid_until": "2026-05-31"}
+]

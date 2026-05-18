@@ -12,8 +12,8 @@ export default function RagResultCard({ result }: { result: RagResponse }) {
         <Text style={styles.confidenceText}>{confidence}% CONFIDENCE</Text>
       </View>
       
-      <Text style={styles.title}>{result.office}</Text>
-      <Text style={styles.desc}>{result.description}</Text>
+      <Text style={styles.title}>{result.office || result.service_name || 'Service'}</Text>
+      <Text style={styles.desc}>{result.description || result.answer}</Text>
       
       <View style={styles.ragBox}>
         <View style={styles.sourceHeader}>

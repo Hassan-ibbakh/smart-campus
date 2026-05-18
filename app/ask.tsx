@@ -12,7 +12,7 @@ import BottomNav from '../components/BottomNav';
 import VoiceButton from '../components/VoiceButton';
 import { useSpeech } from '../hooks/useSpeech';
 
-const API_URL = 'http://100.71.97.166:8081';
+import { API_URL } from '../config';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface NavStep { instruction: string; distance?: number; }
@@ -338,12 +338,12 @@ export default function AskScreen() {
           <Ionicons name="arrow-back" size={20} color="#1E293B" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerSub}>STORE FINDER</Text>
-          <Text style={styles.headerTitle}>ASSISTANT MALL</Text>
+          <Text style={styles.headerSub}>RECHERCHE BOUTIQUE</Text>
+          <Text style={styles.headerTitle}>ASSISTANT SHOPPING</Text>
         </View>
         <View style={styles.statusBadge}>
           <View style={styles.statusDot} />
-          <Text style={styles.statusText}>RAG ONLINE</Text>
+          <Text style={styles.statusText}>IA CONNECTÉE</Text>
         </View>
       </View>
 
@@ -431,7 +431,7 @@ export default function AskScreen() {
             <View style={styles.voiceZone}>
               <View>
                 <Text style={styles.voiceHint}>Appuyez et parlez</Text>
-                <Text style={styles.voiceSubHint}>Je vous guide jusqu'à la boutique 🔊</Text>
+                <Text style={styles.voiceSubHint}>Je vous guide dans le mall 🔊</Text>
               </View>
               <View style={styles.voiceButtonWrap}>
                 <VoiceButton onSpeechEnd={handleSpeechEnd} />

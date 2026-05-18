@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wrinitriq - Démo Finale Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Effet tache de chaleur */
+        #heatmapCanvas {
+            filter: blur(15px);
+            opacity: 0.7;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none; 
+        }
+        /* Canvas pour les points live */
+        #liveCanvas {
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .hidden-canvas {
+            opacity: 0 !important;
+        }
+        /* Animation du toast de notification */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex overflow-hidden">
+
+    <!-- Sidebar / Panneau de contrôle -->
+    <aside class="w-80 bg-indigo-900 text-white flex flex-col shadow-2xl z-20">
+        <div class="p-6 flex items-center space-x-3 border-b border-indigo-800">
+            <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+            <div>
+                <h1 class="text-2xl font-bold tracking-wider">WRINITRIQ</h1>
+                <p class="text-xs text-indigo-300">Spatial Intelligence (DaaS)</p>
+            </div>
+        </div>
+
+        <div class="p-6 flex-1 overflow-y-auto space-y-6">
+            <!-- KPIs -->
+            <div>
+                <h2 class="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-3">Statistiques Live</h2>
+                <div class="bg-indigo-800 rounded-lg p-4 mb-3 border border-indigo-700 shadow-inner">
+                    <p class="text-xs text-indigo-200">Visiteurs Actifs (PDR)</p>
+                    <p class="text-3xl font-bold text-white flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-green-400 animate-pulse mr-2"></span>
+                        1,420
+                    </p>
+                </div>
+                <div class="flex space-x-3">
+                    <div class="bg-indigo-800 rounded-lg p-3 border border-indigo-700 w-1/2">
+                        <p class="text-xs text-indigo-200">Temps Moyen</p>
+                        <p class="text-lg font-bold">45 min</p>
+                    </div>
+                    <div class="bg-indigo-800 rounded-lg p-3 border border-indigo-700 w-1/2">
+                        <p class="text-xs text-indigo-200">Taux Adoption</p>
+                        <p class="text-lg font-bold">68%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div>
+                <h2 class="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-3">Contrôles Affichage</h2>
+                <div class="space-y-3">
+                    <button id="toggleLive" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded shadow transition-colors flex items-center justify-between">
+                        <span>Flux Piétons (Live)</span>
+                        <div class="w-10 h-5 bg-blue-800 rounded-full relative shadow-inner">
+                            <div id="liveToggleKnob" class="w-5 h-5 bg-white rounded-full absolute left-5 shadow transition-all"></div>
+                        </div>
+                    </button>
+                    
+                    <button id="toggleHeatmap" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded shadow transition-colors flex items-center justify-between border border-indigo-500">
+                        <span>Carte de Chaleur</span>
+                        <div class="w-10 h-5 bg-indigo-900 rounded-full relative shadow-inner">
+                            <div id="heatmapToggleKnob" class="w-5 h-5 bg-white rounded-full absolute left-0 shadow transition-all"></div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Géomarketing -->
+            <div class="pt-4 border-t border-indigo-800">
+                <h2 class="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-3">Géomarketing</h2>
+                <p class="text-xs text-indigo-200 mb-3">Détectez une zone froide et lancez une campagne push ciblée.</p>
+                <button id="btnPromo" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 11V9a2 2 0 00-2-2m2 4v4a2 2 0 104 0v-1m-4-3H9m2 0h4m6 1a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Lancer Campagne Flash</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-4 bg-indigo-950 text-xs text-indigo-400 text-center">
+            Connecté: Karim (Manager)
+        </div>
+    </aside>
+
+    <!-- Zone Principale (Carte) -->
+    <main class="flex-1 relative flex flex-col bg-slate-200">
+        
+        <!-- Header -->
+        <header class="bg-white shadow px-8 py-4 flex justify-between items-center z-10">
+            <h2 class="text-xl font-bold text-gray-800">Morocco Mall <span class="text-gray-400 font-normal">| Niveau 2</span></h2>
+            <div class="flex items-center space-x-2 text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                <span>Système Zéro Infrastructure Actif</span>
+            </div>
+        </header>
+
+        <!-- Conteneur Carte -->
+        <div class="flex-1 p-8 flex items-center justify-center relative overflow-hidden">
+            
+            <div class="relative w-full max-w-5xl h-[600px] bg-white rounded-2xl shadow-2xl border-4 border-white overflow-hidden" id="mapContainer">
+                
+                <!-- SVG de la Carte -->
+                <svg class="absolute inset-0 w-full h-full text-gray-300" viewBox="0 0 1000 600" fill="currentColor">
+                    <!-- Fond couloirs -->
+                    <rect width="1000" height="600" fill="#f8fafc" />
+                    
+                    <!-- Boutiques -->
+                    <rect x="80" y="80" width="180" height="120" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="3" rx="8"/>
+                    <text x="170" y="145" font-size="16" font-weight="bold" fill="#64748b" text-anchor="middle">ZARA</text>
+
+                    <rect x="290" y="80" width="250" height="180" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="3" rx="8"/>
+                    <text x="415" y="175" font-size="16" font-weight="bold" fill="#64748b" text-anchor="middle">Galeries Lafayette</text>
+
+                    <rect x="570" y="80" width="150" height="120" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="3" rx="8"/>
+                    <text x="645" y="145" font-size="16" font-weight="bold" fill="#64748b" text-anchor="middle">Lefties</text>
+
+                    <rect x="750" y="80" width="180" height="180" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="3" rx="8"/>
+                    <text x="840" y="175" font-size="16" font-weight="bold" fill="#64748b" text-anchor="middle">Food Court</text>
+
+                    <rect x="80" y="320" width="300" height="220" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="3" rx="8"/>
+                    <text x="230" y="435" font-size="16" font-weight="bold" fill="#64748b" text-anchor="middle">Aquarium Central</text>
+
+                    <rect x="420" y="360" width="200" height="180" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="3" rx="8"/>
+                    <text x="520" y="455" font-size="16" font-weight="bold" fill="#64748b" text-anchor="middle">Cinéma IMAX</text>
+
+                    <rect x="660" y="320" width="270" height="120" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="3" rx="8"/>
+                    <text x="795" y="385" font-size="16" font-weight="bold" fill="#64748b" text-anchor="middle">Fnac</text>
+
+                    <!-- Entrée principale -->
+                    <path d="M 460 580 L 540 580 L 540 600 L 460 600 Z" fill="#94a3b8"/>
+                    <text x="500" y="595" font-size="12" font-weight="bold" fill="white" text-anchor="middle">ENTRÉE PRINCIPALE</text>
+                </svg>
+
+                <!-- Canvas Heatmap (Taches de chaleur) -->
+                <canvas id="heatmapCanvas" width="1000" height="600" class="absolute inset-0 hidden-canvas"></canvas>
+                
+                <!-- Canvas Live Users (Points qui bougent) -->
+                <canvas id="liveCanvas" width="1000" height="600" class="absolute inset-0"></canvas>
+
+                <!-- Effet d'onde géomarketing (Caché par défaut) -->
+                <div id="promoRipple" class="absolute border-4 border-orange-500 rounded-full opacity-0 pointer-events-none" style="left: 170px; top: 145px; width: 0px; height: 0px; transform: translate(-50%, -50%);"></div>
+
+            </div>
+
+            <!-- Toast de notification (Géomarketing) -->
+            <div id="toastPromo" class="absolute top-6 right-6 bg-white rounded-lg shadow-2xl border-l-4 border-orange-500 p-4 w-80 hidden z-50">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 w-0 flex-1">
+                        <p class="text-sm font-bold text-gray-900">Campagne Envoyée !</p>
+                        <p class="mt-1 text-xs text-gray-500">Offre "-15% Zara" poussée à 45 visiteurs à proximité via Geofencing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Légende Heatmap -->
+            <div id="legendHeatmap" class="absolute bottom-12 right-12 bg-white/90 p-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-500 z-10 border border-gray-100">
+                <p class="text-sm font-bold text-gray-800 mb-3 border-b pb-1">Densité (Heatmap)</p>
+                <div class="flex items-center space-x-3 text-sm text-gray-600">
+                    <span class="w-5 h-5 rounded-full bg-red-500 shadow"></span> <span>Saturé</span>
+                </div>
+                <div class="flex items-center space-x-3 text-sm text-gray-600 mt-2">
+                    <span class="w-5 h-5 rounded-full bg-yellow-400 shadow"></span> <span>Moyen</span>
+                </div>
+                <div class="flex items-center space-x-3 text-sm text-gray-600 mt-2">
+                    <span class="w-5 h-5 rounded-full bg-green-400 shadow"></span> <span>Fluide</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // === Configuration des Canvas ===
+        const heatmapCanvas = document.getElementById('heatmapCanvas');
+        const hctx = heatmapCanvas.getContext('2d');
+        const liveCanvas = document.getElementById('liveCanvas');
+        const lctx = liveCanvas.getContext('2d');
+
+        // === Points d'intérêts (Centres des boutiques/zones) ===
+        const POIs = [
+            { x: 840, y: 175, type: 'hot' },  // Food Court
+            { x: 500, y: 560, type: 'hot' },  // Entrée
+            { x: 230, y: 435, type: 'hot' },  // Aquarium
+            { x: 415, y: 175, type: 'med' },  // Galeries Lafayette
+            { x: 795, y: 385, type: 'med' },  // Fnac
+            { x: 645, y: 145, type: 'cold' }, // Lefties
+            { x: 170, y: 145, type: 'cold' }, // Zara
+            { x: 520, y: 455, type: 'cold' }  // IMAX
+        ];
+
+        // === 1. LOGIQUE HEATMAP (Carte de chaleur statique) ===
+        const heatmapData = [
+            { x: 840, y: 175, intensity: 'red', radius: 150 },
+            { x: 500, y: 560, intensity: 'red', radius: 130 },
+            { x: 230, y: 435, intensity: 'yellow', radius: 140 },
+            { x: 415, y: 175, intensity: 'orange', radius: 120 },
+            { x: 795, y: 385, intensity: 'orange', radius: 110 },
+            { x: 645, y: 145, intensity: 'green', radius: 80 },
+            { x: 170, y: 145, intensity: 'green', radius: 90 },
+            { x: 520, y: 455, intensity: 'green', radius: 100 }
+        ];
+
+        function drawHeatmap() {
+            hctx.clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height);
+            hctx.globalCompositeOperation = 'screen'; 
+            heatmapData.forEach(point => {
+                const gradient = hctx.createRadialGradient(point.x, point.y, point.radius * 0.1, point.x, point.y, point.radius);
+                if(point.intensity === 'red') {
+                    gradient.addColorStop(0, 'rgba(255, 0, 0, 1)');     
+                    gradient.addColorStop(0.5, 'rgba(255, 165, 0, 0.6)');
+                    gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');     
+                } else if (point.intensity === 'orange' || point.intensity === 'yellow') {
+                    gradient.addColorStop(0, 'rgba(255, 165, 0, 0.9)'); 
+                    gradient.addColorStop(0.6, 'rgba(255, 255, 0, 0.4)');
+                    gradient.addColorStop(1, 'rgba(255, 165, 0, 0)');
+                } else if (point.intensity === 'green') {
+                    gradient.addColorStop(0, 'rgba(0, 255, 0, 0.7)');
+                    gradient.addColorStop(1, 'rgba(0, 255, 0, 0)');
+                }
+                hctx.fillStyle = gradient;
+                hctx.beginPath();
+                hctx.arc(point.x, point.y, point.radius, 0, Math.PI * 2);
+                hctx.fill();
+            });
+        }
+        drawHeatmap(); // Dessin initial
+
+        // === 2. LOGIQUE LIVE USERS (PDR Simulation) ===
+        let users = [];
+        const NUM_USERS = 80;
+
+        // Initialisation des utilisateurs
+        for(let i = 0; i < NUM_USERS; i++) {
+            // Assigne une cible aléatoire parmi les POIs
+            let targetPOI = POIs[Math.floor(Math.random() * POIs.length)];
+            users.push({
+                x: targetPOI.x + (Math.random() * 100 - 50), // Position initiale proche d'un POI
+                y: targetPOI.y + (Math.random() * 100 - 50),
+                targetX: targetPOI.x,
+                targetY: targetPOI.y,
+                speed: 0.2 + Math.random() * 0.5,
+                radius: 3 + Math.random() * 2
+            });
+        }
+
+        function animateUsers() {
+            lctx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+            
+            users.forEach(user => {
+                // Calcul du vecteur de direction
+                let dx = user.targetX - user.x;
+                let dy = user.targetY - user.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                
+                // Si arrivé à destination, choisir une nouvelle cible
+                if (dist < 10) {
+                    let newPOI = POIs[Math.floor(Math.random() * POIs.length)];
+                    user.targetX = newPOI.x + (Math.random() * 80 - 40);
+                    user.targetY = newPOI.y + (Math.random() * 80 - 40);
+                } else {
+                    // Déplacement
+                    user.x += (dx / dist) * user.speed;
+                    user.y += (dy / dist) * user.speed;
+                }
+
+                // Dessin du point (Smartphone)
+                lctx.beginPath();
+                lctx.arc(user.x, user.y, user.radius, 0, Math.PI * 2);
+                lctx.fillStyle = 'rgba(59, 130, 246, 0.8)'; // Bleu Tailwind
+                lctx.fill();
+                
+                // Petite aura autour du point
+                lctx.beginPath();
+                lctx.arc(user.x, user.y, user.radius * 2.5, 0, Math.PI * 2);
+                lctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
+                lctx.fill();
+            });
+
+            requestAnimationFrame(animateUsers);
+        }
+        animateUsers(); // Lancement de la boucle
+
+        // === 3. INTERACTIVITÉ (Boutons et Toggles) ===
+        let heatmapActive = false;
+        let liveActive = true;
+
+        const btnHeatmap = document.getElementById('toggleHeatmap');
+        const knobHeatmap = document.getElementById('heatmapToggleKnob');
+        const legendHeatmap = document.getElementById('legendHeatmap');
+
+        const btnLive = document.getElementById('toggleLive');
+        const knobLive = document.getElementById('liveToggleKnob');
+
+        const btnPromo = document.getElementById('btnPromo');
+        const toastPromo = document.getElementById('toastPromo');
+        const promoRipple = document.getElementById('promoRipple');
+
+        // Toggle Heatmap
+        btnHeatmap.addEventListener('click', () => {
+            heatmapActive = !heatmapActive;
+            if (heatmapActive) {
+                heatmapCanvas.classList.remove('hidden-canvas');
+                legendHeatmap.classList.remove('opacity-0');
+                knobHeatmap.style.left = '20px';
+                btnHeatmap.classList.replace('bg-indigo-700', 'bg-indigo-500');
+            } else {
+                heatmapCanvas.classList.add('hidden-canvas');
+                legendHeatmap.classList.add('opacity-0');
+                knobHeatmap.style.left = '0px';
+                btnHeatmap.classList.replace('bg-indigo-500', 'bg-indigo-700');
+            }
+        });
+
+        // Toggle Live Users
+        btnLive.addEventListener('click', () => {
+            liveActive = !liveActive;
+            if (liveActive) {
+                liveCanvas.classList.remove('hidden-canvas');
+                knobLive.style.left = '20px';
+                btnLive.classList.replace('bg-blue-800', 'bg-blue-600');
+            } else {
+                liveCanvas.classList.add('hidden-canvas');
+                knobLive.style.left = '0px';
+                btnLive.classList.replace('bg-blue-600', 'bg-blue-800');
+            }
+        });
+
+        // Bouton Campagne Géomarketing
+        btnPromo.addEventListener('click', () => {
+            // Animation Ripple sur Zara (Zone froide)
+            promoRipple.style.transition = 'none';
+            promoRipple.style.width = '0px';
+            promoRipple.style.height = '0px';
+            promoRipple.style.opacity = '1';
+            
+            setTimeout(() => {
+                promoRipple.style.transition = 'all 1.5s ease-out';
+                promoRipple.style.width = '300px';
+                promoRipple.style.height = '300px';
+                promoRipple.style.opacity = '0';
+            }, 50);
+
+            // Affichage du Toast
+            toastPromo.classList.remove('hidden');
+            toastPromo.classList.add('toast-animate');
+            
+            // Cacher le toast après 5 secondes
+            setTimeout(() => {
+                toastPromo.classList.add('hidden');
+                toastPromo.classList.remove('toast-animate');
+            }, 5000);
+        });
+
+    </script>
+</body>
+</html>

@@ -2,7 +2,9 @@ import json
 import os
 import base64
 import requests
+import threading
 from pathlib import Path
+from functools import lru_cache
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, File, UploadFile, Form
@@ -12,7 +14,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 try:
-    from service_rag import search_services
+    from service_rag import search_services, _get_collection
 except Exception as _e:
     import traceback
     print(f"[ERREUR] Impossible d'importer service_rag : {_e}")
@@ -42,23 +44,34 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY doit être défini dans backend/.env ou dans les variables d'environnement")
 
-# ─── Nœuds du mall ────────────────────────────────────────────────────────────
-# À synchroniser avec graph_data (graph_data.py / graph.json)
-MALL_NODES = [
-    "entrance",       # Entrée principale
-    "hall",           # Hall central
-    "food_court",     # Restauration
-    "cinema",         # Cinéma
-    "fashion_zone",   # Zone mode (Zara, H&M…)
-    "supermarket",    # Supermarché
-    "pharmacy",       # Pharmacie
-    "atm_zone",       # Distributeurs ATM
-    "kids_zone",      # Espace enfants
-    "parking",        # Parking
-    "restrooms",      # Toilettes / espace de prière
-    "luxury_zone",    # Bijouterie / luxe
-    "sport_zone",     # Articles de sport
-]
+# ─── Préchargement du modèle RAG au démarrage (en arrière-plan) ───────────
+def _warmup_rag():
+    try:
+        print("[STARTUP] Préchargement du modèle RAG...")
+        _get_collection()  # Charge le modèle + l'index ChromaDB
+        print("[STARTUP] ✅ Modèle RAG prêt.")
+    except Exception as e:
+        print(f"[STARTUP] ⚠️ Warmup RAG échoué : {e}")
+
+threading.Thread(target=_warmup_rag, daemon=True).start()
+
+# ─── Cache des réponses RAG pour éviter de recalculer les mêmes requêtes ────────
+_rag_cache: dict = {}
+
+# ─── Nœuds du mall (chargés dynamiquement depuis le graphe) ───────────────────
+MALL_NODES = [n["id"] for n in graph_data["nodes"]]
+
+# ─── Chargement des données externes ──────────────────────────────────────────
+def load_data(filename):
+    path = BASE_DIR / "data" / filename
+    if path.exists():
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+PROMOTIONS = load_data("promotions.json")
+EMERGENCY  = load_data("emergency.json")
+SERVICES   = load_data("services.json")
 
 # ─── Modèles ──────────────────────────────────────────────────────────────────
 class QueryRequest(BaseModel):
@@ -82,6 +95,13 @@ class AskResponse(BaseModel):
     service_name: Optional[str] = None
     horaires: Optional[str] = None
     navigation: Optional[dict] = None
+    promotion: Optional[str] = None
+
+class PositionUpdate(BaseModel):
+    user_id: str
+    node_id: str
+    timestamp: float
+    type: str  # 'visitor' or 'resource' (security, staff)
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -89,10 +109,18 @@ class AskResponse(BaseModel):
 def _rag_answer(query: str, current_node: str) -> AskResponse:
     """
     Logique RAG pour le mall :
+    - Cache en mémoire pour les requêtes fréquentes (< 50ms)
     - Recherche le service/boutique le plus pertinent dans la base vectorielle
     - Construit une réponse naturelle orientée visiteur de mall
     - Calcule l'itinéraire depuis la position courante
+    - Ajoute les infos de promotions si existantes
     """
+    # ── Cache : clé = (query normalisée, nœud de départ) ────────────────────
+    cache_key = (query.lower().strip()[:80], current_node)
+    if cache_key in _rag_cache:
+        print(f"[RAG] Cache hit pour '{query}'")
+        return _rag_cache[cache_key]
+
     try:
         results = search_services(query, top_k=1)
     except Exception as e:
@@ -104,11 +132,19 @@ def _rag_answer(query: str, current_node: str) -> AskResponse:
         )
 
     best = results["metadatas"][0][0]
+    store_name = best['name']
+
+    # Vérifier les promotions
+    active_promo = next((p["title"] for p in PROMOTIONS if p["store"].lower() in store_name.lower()), None)
 
     # Réponse adaptée au contexte mall
-    answer = f"{best['name']} — {best['description']}"
+    answer = f"{store_name} — {best['description']}"
     if best.get("horaires"):
         answer += f" Horaires d'ouverture : {best['horaires']}."
+    
+    if active_promo:
+        answer += f" Bonne nouvelle ! Il y a une promotion en cours : {active_promo}."
+        
     answer += " Souhaitez-vous que je vous guide jusqu'à cet espace ?"
 
     nav       = None
@@ -119,13 +155,56 @@ def _rag_answer(query: str, current_node: str) -> AskResponse:
         except Exception:
             nav = None
 
-    return AskResponse(
+    response = AskResponse(
         answer=answer,
         destination_node=dest_node,
-        service_name=best.get("name"),
+        service_name=store_name,
         horaires=best.get("horaires"),
         navigation=nav,
+        promotion=active_promo
     )
+
+    # Stocker en cache (max 100 entrées pour éviter les fuites mémoire)
+    if len(_rag_cache) < 100:
+        _rag_cache[cache_key] = response
+
+    return response
+
+
+# Stockage temporaire des positions pour le dashboard
+USER_POSITIONS = {}
+
+@app.post("/position")
+def update_position(update: PositionUpdate):
+    """
+    Reçoit les mises à jour de position en temps réel.
+    Permet de suivre les visiteurs et les ressources (sécurité, etc.)
+    """
+    USER_POSITIONS[update.user_id] = {
+        "node_id": update.node_id,
+        "timestamp": update.timestamp,
+        "type": update.type
+    }
+    return {"status": "success", "count": len(USER_POSITIONS)}
+
+@app.get("/analytics/realtime")
+def get_realtime_analytics():
+    """Données pour le dashboard de gestion du mall."""
+    visitors = [v for v in USER_POSITIONS.values() if v["type"] == "visitor"]
+    resources = [r for r in USER_POSITIONS.values() if r["type"] == "resource"]
+    
+    # Calcul simple de congestion par zone
+    congestion = {}
+    for v in visitors:
+        node = v["node_id"]
+        congestion[node] = congestion.get(node, 0) + 1
+        
+    return {
+        "active_visitors": len(visitors),
+        "active_resources": len(resources),
+        "zone_congestion": congestion,
+        "resource_status": resources
+    }
 
 
 def _tts_base64(text: str) -> Optional[str]:
@@ -193,7 +272,7 @@ async def process_voice_command(audio: UploadFile = File(...)):
     Commande vocale de navigation dans le mall :
     Whisper transcrit → LLM extrait from_node / to_node parmi les espaces du mall.
     """
-    file_location = f"temp_{audio.filename}"
+    file_location = f"temp_voice_{os.getpid()}_{os.urandom(4).hex()}.m4a"
     with open(file_location, "wb") as f:
         f.write(await audio.read())
 
@@ -279,38 +358,20 @@ def handle_navigate(request: NavigateRequest):
 
 @app.get("/stores")
 def get_stores():
-    """Liste des enseignes et espaces du mall."""
-    return [
-        {"id": "zara",        "name": "Zara",              "category": "Mode",         "floor": 1, "node_id": "fashion_zone",  "status": "Ouvert"},
-        {"id": "carrefour",   "name": "Carrefour",         "category": "Supermarché",  "floor": 0, "node_id": "supermarket",   "status": "Ouvert"},
-        {"id": "mcdo",        "name": "McDonald's",        "category": "Restauration", "floor": 2, "node_id": "food_court",    "status": "Ouvert"},
-        {"id": "megaplex",    "name": "Cinéma Megaplex",   "category": "Cinéma",       "floor": 3, "node_id": "cinema",        "status": "Ouvert"},
-        {"id": "decathlon",   "name": "Décathlon",         "category": "Sport",        "floor": 1, "node_id": "sport_zone",    "status": "Ouvert"},
-        {"id": "pharmacie",   "name": "Pharmacie du Mall", "category": "Santé",        "floor": 0, "node_id": "pharmacy",      "status": "Ouvert"},
-        {"id": "bijouterie",  "name": "Excellence Bijoux", "category": "Luxe",         "floor": 1, "node_id": "luxury_zone",   "status": "Ouvert"},
-    ]
+    """Liste des enseignes et espaces du mall chargées depuis services.json."""
+    return SERVICES
 
 
 @app.get("/promotions")
 def get_promotions():
-    """Promotions et événements en cours dans le mall."""
-    return [
-        {"id": 1, "store": "Zara",          "title": "Soldes été -30%",         "valid_until": "2026-06-30"},
-        {"id": 2, "store": "Carrefour",     "title": "Fruits & légumes offre",  "valid_until": "2026-05-20"},
-        {"id": 3, "store": "Cinéma Megaplex","title": "Mardi -50% sur billets", "valid_until": "2026-12-31"},
-        {"id": 4, "store": "Décathlon",     "title": "Kit running à 299 MAD",   "valid_until": "2026-05-31"},
-    ]
+    """Promotions et événements en cours dans le mall chargées depuis promotions.json."""
+    return PROMOTIONS
 
 
 @app.get("/emergency")
 def get_emergency():
-    return {
-        "security":     "Sécurité mall : 05 35 00 11 22",
-        "medical":      "Premiers secours : 05 35 00 33 44",
-        "fire":         "15",
-        "police":       "19",
-        "lost_found":   "Objets trouvés — Accueil central : Niveau 0",
-    }
+    """Contacts d'urgence chargés depuis emergency.json."""
+    return EMERGENCY
 
 
 @app.get("/graph")
